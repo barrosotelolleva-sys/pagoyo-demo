@@ -5,15 +5,77 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PagoYo — Panel Camarero</title>
   <style>
-    body{font-family:system-ui,Arial,sans-serif;background:#f4f6f8;margin:0;padding:40px;text-align:center;color:#111}
-    h1{color:#0F766E;margin-bottom:0}
-    p{max-width:600px;margin:8px auto;font-size:16px;color:#333}
+    :root{--teal:#0F766E;--orange:#E67E22;--bg:#F4F6F8;--ok:#16a34a;--warn:#ef4444}
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:#111}
+    header{background:var(--teal);color:#fff;padding:14px;text-align:center;font-weight:700}
+    main{max-width:900px;margin:auto;padding:18px}
+    .grid{display:grid;gap:12px}
+    .totals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(15,118,110,.1)}
+    .label{font-size:13px;color:#555}
+    .value{font-size:22px;font-weight:800;color:#0F766E}
+    .list{display:grid;gap:10px;margin-top:6px}
+    .row{display:flex;gap:12px;align-items:center;justify-content:space-between;border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff}
+    .left{display:flex;flex-direction:column;gap:4px}
+    .id{font-weight:700}
+    .items{font-size:13px;color:#555}
+    .badge{border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700}
+    .card-badge{background:#eefcf9;color:#0F766E;border:1px solid rgba(15,118,110,.25)}
+    .cash{background:#fff7ed;color:#b45309;border:1px solid #fdba74}
+    .cardm{background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd}
+    .paid{background:#ecfdf5;color:#16a34a;border:1px solid #86efac}
+    .btn{border:none;background:var(--teal);color:#fff;font-weight:700;padding:10px 12px;border-radius:10px;cursor:pointer}
+    .btn:disabled{background:#ddd;color:#666;cursor:default}
+    footer{text-align:center;margin-top:14px}
     a{color:#0F766E;text-decoration:none;font-weight:600}
+    @media (max-width:720px){.totals{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <h1>Panel Camarero</h1>
-  <p>Desde aquí el camarero ve los pagos pendientes, importes y métodos de pago confirmados por los clientes.</p>
-  <p><a href="../">⬅ Volver al inicio</a></p>
+  <header>Mesa 6 — Panel Camarero</header>
+  <main class="grid">
+    <section class="totals">
+      <div class="card"><div class="label">Total TPV</div><div class="value">69,90 €</div></div>
+      <div class="card"><div class="label">Total asignado</div><div class="value">45,70 €</div></div>
+      <div class="card"><div class="label">Pendiente</div><div class="value" style="color:#ef4444">24,20 €</div></div>
+    </section>
+
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h3 style="margin:0;color:#0F766E">Pagos</h3>
+        <span class="badge card-badge">Pendientes: 2</span>
+      </div>
+      <div class="list">
+        <div class="row">
+          <div class="left">
+            <span class="id">Parcial #A1 • 18,50 €</span>
+            <span class="items">1× Calamares · 2× Refresco</span>
+          </div>
+          <span class="badge cardm">Tarjeta</span>
+          <button class="btn">Marcar cobrado</button>
+        </div>
+
+        <div class="row">
+          <div class="left">
+            <span class="id">Parcial #B2 • 27,20 €</span>
+            <span class="items">1× Calamares · 1× Patatas · 2× Caña</span>
+          </div>
+          <span class="badge cash">Efectivo</span>
+          <button class="btn">Marcar cobrado</button>
+        </div>
+
+        <div class="row">
+          <div class="left">
+            <span class="id">Parcial #C3 • 24,20 €</span>
+            <span class="items">1× Calamares · 2× Refresco · 2× Tarta</span>
+          </div>
+          <span class="badge paid">Cobrado</span>
+          <button class="btn" disabled>Cobrado</button>
+        </div>
+      </div>
+    </section>
+
+    <footer><p><a href="../">⬅ Volver al inicio</a></p></footer>
+  </main>
 </body>
 </html>
