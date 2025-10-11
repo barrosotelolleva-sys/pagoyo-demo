@@ -50,9 +50,10 @@ padding:12px;border-radius:12px;text-align:center;font-weight:700;font-size:17px
 
  <section class="totals">
   <div class="card"><div class="label">Total TPV</div><div id="tpvTotal" class="value">69,90 €</div></div>
-  <div class="card"><div class="label">Total cobrado</div><div id="assignedTotal" class="value">45,70 €</div></div>
+  <div class="card"><div class="label">Total cobrado</div><div id="paidTotal" class="value">45,70 €</div></div>
   <div class="card"><div class="label">Total pendiente cobrar</div><div id="pendingTotal" class="value" style="color:#ef4444">24,20 €</div></div>
 </section>
+
    
 
     <!-- LISTA PAGOS -->
@@ -94,108 +95,111 @@ padding:12px;border-radius:12px;text-align:center;font-weight:700;font-size:17px
     <footer><p><a href="../">⬅ Volver al inicio</a></p></footer>
   </main>
 
-  <script>
-    // --- Utils € ↔ número
-    const euroToNum = (s) =>
-      parseFloat(s.replace(/\./g,'').replace(',', '.').replace(/[^\d.]/g,'')) || 0;
-    const numToEuro = (n) => n.toFixed(2).replace('.', ',') + ' €';
+ <script>
+  // --- Utils € ↔ número
+  const euroToNum = (s) =>
+    parseFloat(s.replace(/\./g,'').replace(',', '.').replace(/[^\d.]/g,'')) || 0;
+  const numToEuro = (n) => n.toFixed(2).replace('.', ',') + ' €';
 
-    // --- Elementos
-    const paymentsList  = document.getElementById('paymentsList');
-    const pendingCount  = document.getElementById('pendingCount');
-    const tpvEl         = document.getElementById('tpvTotal');
-    const assignedEl    = document.getElementById('assignedTotal');
-    const pendingEl     = document.getElementById('pendingTotal');
-    const resetBtn      = document.getElementById('resetBtn');
+  // --- Elementos
+  const paymentsList  = document.getElementById('paymentsList');
+  const pendingCount  = document.getElementById('pendingCount');
+  const tpvEl         = document.getElementById('tpvTotal');
+  const paidEl        = document.getElementById('paidTotal');      // ← antes era assigned
+  const pendingEl     = document.getElementById('pendingTotal');
+  const resetBtn      = document.getElementById('resetBtn');
 
-    // --- Estados iniciales
-    const initial = {
-      tpv:      euroToNum(tpvEl.textContent),       // 69,90
-      assigned: euroToNum(assignedEl.textContent),  // 45,70
-      listHTML: document.getElementById('paymentsList').innerHTML
-    };
+  // --- Estados iniciales
+  const initial = {
+    tpv:   euroToNum(tpvEl.textContent),   // 69,90
+    paid:  euroToNum(paidEl.textContent),  // 45,70
+    listHTML: document.getElementById('paymentsList').innerHTML
+  };
 
-    let totalTPV      = initial.tpv;
-    let totalAssigned = initial.assigned;
+  let totalTPV  = initial.tpv;
+  let totalPaid = initial.paid; // ← ahora trabajamos con "cobrado"
 
-    function refreshTotals() {
-  assignedEl.textContent = numToEuro(totalAssigned);
-  const totalPending = Math.max(0, totalTPV - totalAssigned);
-  pendingEl.textContent  = numToEuro(totalPending);
-  pendingEl.style.color  = totalPending > 0 ? '#ef4444' : '#16a34a';
+  // Contador de pendientes = botones activos
+  let pending = document.querySelectorAll('.row .btn:not([disabled])').length;
 
-  // Mostrar/ocultar aviso de mesa lista
-  const banner = document.getElementById('closeBanner');
-  banner.style.display = totalPending === 0 ? 'block' : 'none';
-}
-
-    // Contador pendientes inicial
-    let pending = document.querySelectorAll('.row .btn:not([disabled])').length;
+  function refreshTotals() {
+    paidEl.textContent = numToEuro(totalPaid);
+    const totalPending = Math.max(0, totalTPV - totalPaid);
+    pendingEl.textContent  = numToEuro(totalPending);
+    pendingEl.style.color  = totalPending > 0 ? '#ef4444' : '#16a34a';
+    // Banner "mesa lista"
+    const banner = document.getElementById('closeBanner');
+    if (banner) banner.style.display = totalPending === 0 ? 'block' : 'none';
+    // Contador
     pendingCount.textContent = 'Pendientes: ' + pending;
-    refreshTotals();
+  }
 
-    // --- Marcar cobrado: aquí sí cambian €
-    function attachButton(btn) {
-      btn.addEventListener("click", () => {
-        const idLine = btn.parentElement.querySelector('.id').textContent;
-        const m = idLine.match(/•\s*([\d.,]+)\s*€/);
-        const amountNum = m ? euroToNum(m[1] + ' €') : 0;
+  // --- Marcar cobrado: aquí sí cambian €
+  function attachButton(btn) {
+    btn.addEventListener("click", () => {
+      const idLine = btn.parentElement.querySelector('.id').textContent;
+      const m = idLine.match(/•\s*([\d.,]+)\s*€/);
+      const amountNum = m ? euroToNum(m[1] + ' €') : 0;
 
-        btn.disabled = true;
-        btn.textContent = "Cobrado";
-        btn.previousElementSibling.className = "badge paid";
-        btn.previousElementSibling.textContent = "Cobrado";
+      btn.disabled = true;
+      btn.textContent = "Cobrado";
+      btn.previousElementSibling.className = "badge paid";
+      btn.previousElementSibling.textContent = "Cobrado";
 
-        pending = Math.max(0, pending - 1);
-        pendingCount.textContent = 'Pendientes: ' + pending;
+      pending = Math.max(0, pending - 1);
 
-        totalAssigned = Math.min(totalTPV, totalAssigned + amountNum);
-        refreshTotals();
-      });
-    }
-    document.querySelectorAll(".row .btn").forEach(attachButton);
-
-    // --- Al confirmar cliente: solo añadir fila y subir contador (NO €)
-   function addPendingRow({code, amount, items, method, name}) {
-  const badgeClass = method === 'Efectivo' ? 'cash' : 'cardm';
-  const who = name ? ` de ${name}` : '';
-  const row = document.createElement('div');
-  row.className = 'row';
-  row.innerHTML = `
-    <div class="left">
-      <span class="id">Parcial${who} #${code} • ${amount}</span>
-      <span class="items">${items}</span>
-    </div>
-    <span class="badge ${badgeClass}">${method}</span>
-    <button class="btn">Marcar cobrado</button>
-  `;
-  paymentsList.prepend(row);
-  pending++;
-  pendingCount.textContent = 'Pendientes: ' + pending;
-  attachButton(row.querySelector(".btn"));
-}
-
-
-    // --- Canal entre pestañas
-    const ch = new BroadcastChannel('pagoyo_demo');
-    ch.onmessage = (e) => {
-      const data = e.data || {};
-      if (data.type === 'partial_confirmed') addPendingRow(data);
-    };
-
-    // --- Reset demo
-    resetBtn.addEventListener('click', () => {
-      totalTPV = initial.tpv;
-      totalAssigned = initial.assigned;
-      document.getElementById('paymentsList').innerHTML = initial.listHTML;
-
-      // Recontar y reenganchar
-      pending = document.querySelectorAll('.row .btn:not([disabled])').length;
-      pendingCount.textContent = 'Pendientes: ' + pending;
-      document.querySelectorAll(".row .btn").forEach(attachButton);
+      // Actualiza totales (€): sube COBRADO, y "Pendiente cobrar" se recalcula
+      totalPaid = Math.min(totalTPV, totalPaid + amountNum);
       refreshTotals();
     });
-  </script>
+  }
+
+  // Conectar botones existentes al cargar
+  document.querySelectorAll(".row .btn").forEach(attachButton);
+
+  // --- Al confirmar cliente: solo añadir fila y subir contador (NO €)
+  function addPendingRow({code, amount, items, method, name}) {
+    const badgeClass = method === 'Efectivo' ? 'cash' : 'cardm';
+    const who = name ? ` de ${name}` : '';
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `
+      <div class="left">
+        <span class="id">Parcial${who} #${code} • ${amount}</span>
+        <span class="items">${items}</span>
+      </div>
+      <span class="badge ${badgeClass}">${method}</span>
+      <button class="btn">Marcar cobrado</button>
+    `;
+    paymentsList.prepend(row);
+    pending++;
+    refreshTotals();      // ← solo actualiza contador; € no cambian
+    attachButton(row.querySelector(".btn"));
+  }
+
+  // --- Canal entre pestañas
+  const ch = new BroadcastChannel('pagoyo_demo');
+  ch.onmessage = (e) => {
+    const data = e.data || {};
+    if (data.type === 'partial_confirmed') addPendingRow(data);
+  };
+
+  // --- Reset demo
+  resetBtn.addEventListener('click', () => {
+    totalTPV  = initial.tpv;
+    totalPaid = initial.paid;
+    document.getElementById('paymentsList').innerHTML = initial.listHTML;
+
+    // Recontar y reenganchar
+    pending = document.querySelectorAll('.row .btn:not([disabled])').length;
+    document.querySelectorAll(".row .btn").forEach(attachButton);
+    refreshTotals();
+  });
+
+  // Inicializar UI
+  refreshTotals();
+</script>
+ 
 </body>
 </html>
 
