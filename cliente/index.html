@@ -5,26 +5,42 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PagoYo — Vista Cliente</title>
   <style>
-    :root { --teal:#0F766E; --orange:#E67E22; --bg:#F4F6F8; }
+    :root { --teal:#0F766E; --orange:#E67E22; --bg:#F4F6F8; --ink:#111; --muted:#667085; }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:#111;}
-    header{background:var(--teal);color:#fff;padding:14px;text-align:center;font-size:20px;font-weight:600;}
-    main{max-width:700px;margin:auto;padding:20px;}
-    h2{margin:14px 0 6px;color:var(--teal);}
-    ul{list-style:none;padding:0;margin:0;}
-    li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 8px;margin-bottom:6px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-    .info{flex:1;}
-    .controls{display:flex;align-items:center;gap:8px;}
-    .btnSmall{width:28px;height:28px;border:none;border-radius:8px;background:#eee;font-weight:700;cursor:pointer;}
-    .btnSmall:hover{background:#ddd;}
-    .qty{min-width:24px;text-align:center;font-weight:600;}
-    .total{display:flex;justify-content:space-between;margin-top:16px;padding:12px;background:#fff;border-radius:10px;font-weight:700;color:#0F766E;}
-    .btnMain{margin-top:20px;display:block;width:100%;background:var(--orange);color:#fff;font-weight:600;padding:14px;border:none;border-radius:12px;font-size:16px;cursor:pointer;}
-    .btnMain:hover{opacity:.95}
-    footer{text-align:center;margin-top:20px;}
-    a{color:var(--teal);text-decoration:none;font-weight:600}
+    body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);}
+    header{background:var(--teal);color:#fff;padding:12px 14px}
+    header .bar{max-width:820px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    header .title{font-weight:800}
+    header .meta{opacity:.95;font-weight:600}
+    main{max-width:820px;margin:auto;padding:18px}
+    .panel{display:grid;gap:10px;margin-bottom:12px}
+    .banner{background:#f0fdfa;border:1px solid #99f6e4;color:#065f46;padding:10px 12px;border-radius:12px;font-weight:700}
+    .totals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(15,118,110,.1)}
+    .label{font-size:12px;color:#555}
+    .value{font-size:18px;font-weight:800;color:#0F766E}
+    .hint{font-size:13px;color:var(--muted)}
+    .list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+    .row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
+    .name{font-weight:700}
+    .metaLine{font-size:12px;color:#555}
+    .controls{display:flex;align-items:center;gap:8px}
+    .pill{background:#f9fafb;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;font-size:12px;color:#444}
+    .btnQty{width:32px;height:32px;border:none;border-radius:10px;background:#eef2f6;font-weight:800;cursor:pointer}
+    .btnQty:hover{background:#e3e8ef}
+    .qty{min-width:22px;text-align:center;font-weight:800}
+    .lineTotal{min-width:82px;text-align:right;font-weight:800;color:#0F766E}
+    .summary{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:12px;padding:12px;border:1px solid rgba(15,118,110,.1);margin-top:10px}
+    .summary strong{color:#0F766E}
+    .btnMain{margin-top:14px;display:block;width:100%;background:var(--orange);color:#fff;font-weight:700;padding:14px;border:none;border-radius:12px;font-size:16px;cursor:pointer}
+    .btnMain:disabled{background:#f1a361;cursor:not-allowed}
+    .done{display:none;margin-top:12px;padding:12px;background:#ecfdf5;border:1px solid #86efac;border-radius:12px}
+    .small{color:#444;font-size:14px;margin-top:6px}
+    .ref{font-weight:800;color:#0F766E}
+    footer{text-align:center;margin-top:16px}
+    a{color:#0F766E;text-decoration:none;font-weight:600}
     /* Modal */
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:18px;}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:18px}
     .modal{width:min(520px,92vw);background:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:18px;border:1px solid rgba(15,118,110,.15)}
     .modal h3{margin:0 0 10px;color:#0F766E}
     .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
@@ -33,61 +49,116 @@
     .opt.cash{background:#fff8ee}
     .opt.card{background:#eff6ff}
     .close{margin-top:12px;display:block;width:100%;background:#111;color:#fff;border:none;border-radius:10px;padding:10px;cursor:pointer}
-    /* Resumen */
-    .done{display:none;margin-top:16px;padding:14px;background:#ecfdf5;border:1px solid #86efac;border-radius:12px}
-    .small{color:#444;font-size:14px;margin-top:6px}
-    .ref{font-weight:800;color:#0F766E}
   </style>
 </head>
 <body>
-  <header>Mesa 6 — Elige qué pagar</header>
+  <header>
+    <div class="bar">
+      <span class="title">Mesa 6 — Elige qué pagar</span>
+      <span class="meta" id="mesaTotal">Total mesa: —</span>
+    </div>
+  </header>
+
   <main>
-    <h2>Consumiciones</h2>
-    <ul id="itemsList">
-      <li data-price="9.50" data-name="Ración Calamares">
-        <div class="info"><span>Ración Calamares</span><br><small>9,50 € unidad</small></div>
+    <!-- Panel de estado visual -->
+    <div class="panel">
+      <div class="banner">Selecciona qué quieres pagar. Las unidades que elijas se descuentan del total disponible.</div>
+      <div class="totals">
+        <div class="card">
+          <div class="label">Total disponible (unidades)</div>
+          <div id="unitsLeft" class="value">—</div>
+          <div class="hint">Se reduce al seleccionar</div>
+        </div>
+        <div class="card">
+          <div class="label">Tu selección (€)</div>
+          <div id="myAmount" class="value">0,00 €</div>
+          <div class="hint">Suma de lo que has marcado</div>
+        </div>
+        <div class="card">
+          <div class="label">Quedará por pagar</div>
+          <div id="remainingAmount" class="value">—</div>
+          <div class="hint">Solo informativo en esta demo</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de consumiciones -->
+    <ul id="itemsList" class="list">
+      <!-- Cada li lleva data-total (unidades mesa), data-price y data-name -->
+      <li data-total="3" data-price="9.50" data-name="Ración Calamares" class="row">
+        <div>
+          <div class="name">Ración Calamares <span class="pill">9,50 €</span></div>
+          <div class="metaLine"><span class="leftLine">Quedan <strong>3</strong> de 3</span></div>
+        </div>
         <div class="controls">
-          <button class="btnSmall" data-act="-">−</button>
+          <button class="btnQty" data-act="-">−</button>
           <span class="qty">0</span>
-          <button class="btnSmall" data-act="+">+</button>
+          <button class="btnQty" data-act="+">+</button>
+          <div class="lineTotal">0,00 €</div>
         </div>
       </li>
-      <li data-price="2.20" data-name="Refresco">
-        <div class="info"><span>Refresco</span><br><small>2,20 € unidad</small></div>
+
+      <li data-total="6" data-price="2.20" data-name="Refresco" class="row">
+        <div>
+          <div class="name">Refresco <span class="pill">2,20 €</span></div>
+          <div class="metaLine"><span class="leftLine">Quedan <strong>6</strong> de 6</span></div>
+        </div>
         <div class="controls">
-          <button class="btnSmall" data-act="-">−</button>
+          <button class="btnQty" data-act="-">−</button>
           <span class="qty">0</span>
-          <button class="btnSmall" data-act="+">+</button>
+          <button class="btnQty" data-act="+">+</button>
+          <div class="lineTotal">0,00 €</div>
         </div>
       </li>
-      <li data-price="6.00" data-name="Ración Patatas">
-        <div class="info"><span>Ración Patatas</span><br><small>6,00 € unidad</small></div>
+
+      <li data-total="2" data-price="6.00" data-name="Ración Patatas" class="row">
+        <div>
+          <div class="name">Ración Patatas <span class="pill">6,00 €</span></div>
+          <div class="metaLine"><span class="leftLine">Quedan <strong>2</strong> de 2</span></div>
+        </div>
         <div class="controls">
-          <button class="btnSmall" data-act="-">−</button>
+          <button class="btnQty" data-act="-">−</button>
           <span class="qty">0</span>
-          <button class="btnSmall" data-act="+">+</button>
+          <button class="btnQty" data-act="+">+</button>
+          <div class="lineTotal">0,00 €</div>
         </div>
       </li>
-      <li data-price="1.80" data-name="Caña">
-        <div class="info"><span>Caña</span><br><small>1,80 € unidad</small></div>
+
+      <li data-total="4" data-price="1.80" data-name="Caña" class="row">
+        <div>
+          <div class="name">Caña <span class="pill">1,80 €</span></div>
+          <div class="metaLine"><span class="leftLine">Quedan <strong>4</strong> de 4</span></div>
+        </div>
         <div class="controls">
-          <button class="btnSmall" data-act="-">−</button>
+          <button class="btnQty" data-act="-">−</button>
           <span class="qty">0</span>
-          <button class="btnSmall" data-act="+">+</button>
+          <button class="btnQty" data-act="+">+</button>
+          <div class="lineTotal">0,00 €</div>
         </div>
       </li>
-      <li data-price="4.50" data-name="Tarta de Queso">
-        <div class="info"><span>Tarta de Queso</span><br><small>4,50 € unidad</small></div>
+
+      <li data-total="2" data-price="4.50" data-name="Tarta de Queso" class="row">
+        <div>
+          <div class="name">Tarta de Queso <span class="pill">4,50 €</span></div>
+          <div class="metaLine"><span class="leftLine">Quedan <strong>2</strong> de 2</span></div>
+        </div>
         <div class="controls">
-          <button class="btnSmall" data-act="-">−</button>
+          <button class="btnQty" data-act="-">−</button>
           <span class="qty">0</span>
-          <button class="btnSmall" data-act="+">+</button>
+          <button class="btnQty" data-act="+">+</button>
+          <div class="lineTotal">0,00 €</div>
         </div>
       </li>
     </ul>
-    <div class="total"><span>Mi total</span><span id="myTotal">0,00 €</span></div>
-    <button id="confirmBtn" class="btnMain">Confirmar y pagar</button>
 
+    <!-- Resumen y CTA -->
+    <div class="summary">
+      <div class="hint">Selecciona unidades y pulsa confirmar</div>
+      <div><strong id="myTotal">0,00 €</strong></div>
+    </div>
+    <button id="confirmBtn" class="btnMain" disabled>Confirmar y pagar</button>
+
+    <!-- Confirmado -->
     <div id="doneBox" class="done">
       ✔ Tu parte está lista. Método: <span id="methodTxt" class="ref">—</span><br/>
       <span class="small">Nombre: <span id="refCode" class="ref"></span></span>
@@ -97,7 +168,7 @@
   </main>
 
   <!-- Modal -->
-  <div id="overlay" class="overlay">
+  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal">
       <h3>Selecciona método de pago</h3>
       <div class="options">
@@ -117,81 +188,139 @@
 
   <script>
     const $ = s => document.querySelector(s);
-    const overlay = $("#overlay");
+    const $$ = s => [...document.querySelectorAll(s)];
+    const list = $("#itemsList");
+    const mesaTotalEl = $("#mesaTotal");
+    const unitsLeftEl = $("#unitsLeft");
+    const myAmountEl = $("#myAmount");
+    const remainingAmountEl = $("#remainingAmount");
+    const myTotalEl = $("#myTotal");
     const confirmBtn = $("#confirmBtn");
+    const overlay = $("#overlay");
     const closeBtn = $("#closeBtn");
     const doneBox = $("#doneBox");
     const methodTxt = $("#methodTxt");
     const refCode = $("#refCode");
-    const totalEl = $("#myTotal");
-    const list = $("#itemsList");
 
-    // --- calcular total
-    function calcTotal() {
-      let total = 0;
-      list.querySelectorAll("li").forEach(li=>{
-        const price = parseFloat(li.dataset.price);
-        const qty = parseInt(li.querySelector(".qty").textContent);
-        total += price * qty;
-      });
-      totalEl.textContent = total.toFixed(2).replace(".", ",")+" €";
-      return total;
+    const fmt = n => n.toFixed(2).replace(".", ",") + " €";
+
+    // Estado base (lo que trae el TPV para la mesa)
+    const items = $$("#itemsList > li").map(li => ({
+      el: li,
+      name: li.dataset.name,
+      price: parseFloat(li.dataset.price),
+      total: parseInt(li.dataset.total,10),
+      selected: 0
+    }));
+
+    // Calcular totales de mesa (€ y unidades)
+    function mesaImporteTotal(){
+      return items.reduce((acc,i)=> acc + i.price * i.total, 0);
     }
-    list.addEventListener("click",e=>{
-      if(e.target.dataset.act){
-        const li = e.target.closest("li");
-        const qtyEl = li.querySelector(".qty");
-        let q = parseInt(qtyEl.textContent);
-        q += e.target.dataset.act==="+"?1:-1;
-        q = Math.max(0,q);
-        qtyEl.textContent = q;
-        calcTotal();
+    function mesaUnidadesTotal(){
+      return items.reduce((acc,i)=> acc + i.total, 0);
+    }
+
+    function mesaUnidadesRestantes(){
+      return items.reduce((acc,i)=> acc + (i.total - i.selected), 0);
+    }
+    function mesaImporteRestante(){
+      return items.reduce((acc,i)=> acc + (i.total - i.selected) * i.price, 0);
+    }
+    function miImporte(){
+      return items.reduce((acc,i)=> acc + i.selected * i.price, 0);
+    }
+
+    // Pintar cabecera y panel
+    function refreshUI(){
+      mesaTotalEl.textContent = "Total mesa: " + fmt(mesaImporteTotal());
+      unitsLeftEl.textContent = mesaUnidadesRestantes() + " / " + mesaUnidadesTotal();
+      myAmountEl.textContent = fmt(miImporte());
+      remainingAmountEl.textContent = fmt(mesaImporteRestante());
+      myTotalEl.textContent = fmt(miImporte());
+      confirmBtn.disabled = miImporte() <= 0;
+
+      // Por cada línea, actualizar “Quedan” y total de línea
+      items.forEach(i=>{
+        const left = i.total - i.selected;
+        i.el.querySelector(".leftLine strong").textContent = left;
+        i.el.querySelector(".qty").textContent = i.selected;
+        i.el.querySelector(".lineTotal").textContent = fmt(i.selected * i.price);
+      });
+    }
+
+    // Controles +/-
+    list.addEventListener("click", (e)=>{
+      const act = e.target.dataset.act;
+      if(!act) return;
+      const li = e.target.closest("li");
+      const it = items.find(x=>x.el===li);
+      if(!it) return;
+      if(act === "+"){
+        // no permitir pasar de lo disponible
+        if(it.selected < it.total) it.selected++;
+      }else{
+        if(it.selected > 0) it.selected--;
       }
+      refreshUI();
     });
 
+    // Inicial
+    refreshUI();
+
+    // Confirmar → abrir modal
     confirmBtn.addEventListener("click", ()=>{
-      const total = calcTotal();
-      if(total<=0){alert("Selecciona al menos una consumición.");return;}
-      overlay.style.display="flex";
+      overlay.style.display = "flex";
+      overlay.setAttribute("aria-hidden","false");
     });
-    closeBtn.addEventListener("click", ()=> overlay.style.display="none");
-    overlay.addEventListener("click", e=>{ if(e.target===overlay) closeBtn.click(); });
+    closeBtn.addEventListener("click", ()=>{
+      overlay.style.display = "none";
+      overlay.setAttribute("aria-hidden","true");
+    });
+    overlay.addEventListener("click", (e)=>{ if(e.target===overlay) closeBtn.click(); });
 
-    // Canal entre pestañas
+    // Canal a Camarero
     const ch = new BroadcastChannel('pagoyo_demo');
 
-    // Elegir método
-    document.querySelectorAll(".opt").forEach(opt=>{
+    // Elegir método y enviar
+    $$(".opt").forEach(opt=>{
       opt.addEventListener("click", ()=>{
         const method = opt.dataset.method;
         const name = ($("#custName").value || "Cliente").trim();
-        const total = calcTotal();
-        const itemsSel = [...list.querySelectorAll("li")]
-          .filter(li=>parseInt(li.querySelector(".qty").textContent)>0)
-          .map(li=>{
-            const q=li.querySelector(".qty").textContent;
-            const n=li.dataset.name;
-            return `${q}× ${n}`;
-          }).join(" · ");
 
-        // Mostrar resumen
-        methodTxt.textContent=method;
-        refCode.textContent=name;
-        doneBox.style.display="block";
-        confirmBtn.textContent="Parte confirmada";
-        confirmBtn.disabled=true;
+        // Construir string de items seleccionados
+        const itemsSel = items
+          .filter(i=> i.selected>0)
+          .map(i=> `${i.selected}× ${i.name}`)
+          .join(" · ");
+
+        // Importe
+        const total = miImporte();
+
+        // Resumen local
+        methodTxt.textContent = method;
+        refCode.textContent = name;
+        doneBox.style.display = "block";
+        confirmBtn.textContent = "Parte confirmada";
+        confirmBtn.disabled = true;
         closeBtn.click();
 
-        // Enviar al camarero
+        // Enviar al Panel Camarero
         ch.postMessage({
-          type:"partial_confirmed",
-          name,method,
-          amount:total.toFixed(2).replace(".",",")+" €",
-          items:itemsSel,
-          code:"M6-"+Math.random().toString(36).slice(2,6).toUpperCase()
+          type: 'partial_confirmed',
+          name,
+          method,
+          amount: fmt(total).replace(/\s/g,''), // "18,50 €"
+          items: itemsSel,
+          code: "M6-" + Math.random().toString(36).slice(2,6).toUpperCase()
         });
+
+        // Opcional: bloquear más cambios (demo)
+        list.style.opacity = .6;
+        list.style.pointerEvents = "none";
       });
     });
   </script>
 </body>
 </html>
+
