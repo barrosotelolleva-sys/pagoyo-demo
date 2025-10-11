@@ -24,10 +24,12 @@
     .row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
     .name{font-weight:700}
     .metaLine{font-size:12px;color:#555}
-    .controls{display:flex;align-items:center;gap:8px}
+    .controls{display:flex;align-items:center;gap:10px}
     .pill{background:#f9fafb;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;font-size:12px;color:#444}
-    .btnQty{width:32px;height:32px;border:none;border-radius:10px;background:#eef2f6;font-weight:800;cursor:pointer}
+    .btnQty{position:relative;width:40px;height:40px;border:none;border-radius:12px;background:#eef2f6;font-weight:800;cursor:pointer;overflow:hidden}
     .btnQty:hover{background:#e3e8ef}
+    .btnQty .rip{position:absolute;inset:auto; width:10px;height:10px;border-radius:50%;opacity:.25;transform:translate(-50%,-50%) scale(1);animation:rip .45s ease-out}
+    @keyframes rip{from{transform:translate(-50%,-50%) scale(1);opacity:.3}to{transform:translate(-50%,-50%) scale(16);opacity:0}}
     .qty{min-width:22px;text-align:center;font-weight:800}
     .lineTotal{min-width:82px;text-align:right;font-weight:800;color:#0F766E}
     .summary{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:12px;padding:12px;border:1px solid rgba(15,118,110,.1);margin-top:10px}
@@ -39,9 +41,11 @@
     .ref{font-weight:800;color:#0F766E}
     footer{text-align:center;margin-top:16px}
     a{color:#0F766E;text-decoration:none;font-weight:600}
-    /* Modal */
+    /* Modal + animación */
     .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:18px}
-    .modal{width:min(520px,92vw);background:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:18px;border:1px solid rgba(15,118,110,.15)}
+    .overlay.show{display:flex}
+    .modal{width:min(520px,92vw);background:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:18px;border:1px solid rgba(15,118,110,.15);opacity:0;transform:scale(.98);animation:pop .18s ease-out forwards}
+    @keyframes pop{to{opacity:1;transform:scale(1)}}
     .modal h3{margin:0 0 10px;color:#0F766E}
     .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
     .opt{border:1.5px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center;font-weight:700;cursor:pointer;background:#fafafa}
@@ -49,6 +53,9 @@
     .opt.cash{background:#fff8ee}
     .opt.card{background:#eff6ff}
     .close{margin-top:12px;display:block;width:100%;background:#111;color:#fff;border:none;border-radius:10px;padding:10px;cursor:pointer}
+    /* Toast */
+    .toast{position:fixed;top:14px;right:14px;background:#111;color:#fff;padding:10px 12px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);opacity:0;transform:translateY(-8px);animation:toastIn .2s ease-out forwards}
+    @keyframes toastIn{to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 <body>
@@ -60,7 +67,6 @@
   </header>
 
   <main>
-    <!-- Panel de estado visual -->
     <div class="panel">
       <div class="banner">Selecciona qué quieres pagar. Las unidades que elijas se descuentan del total disponible.</div>
       <div class="totals">
@@ -82,9 +88,7 @@
       </div>
     </div>
 
-    <!-- Lista de consumiciones -->
     <ul id="itemsList" class="list">
-      <!-- Cada li lleva data-total (unidades mesa), data-price y data-name -->
       <li data-total="3" data-price="9.50" data-name="Ración Calamares" class="row">
         <div>
           <div class="name">Ración Calamares <span class="pill">9,50 €</span></div>
@@ -151,14 +155,12 @@
       </li>
     </ul>
 
-    <!-- Resumen y CTA -->
     <div class="summary">
       <div class="hint">Selecciona unidades y pulsa confirmar</div>
       <div><strong id="myTotal">0,00 €</strong></div>
     </div>
     <button id="confirmBtn" class="btnMain" disabled>Confirmar y pagar</button>
 
-    <!-- Confirmado -->
     <div id="doneBox" class="done">
       ✔ Tu parte está lista. Método: <span id="methodTxt" class="ref">—</span><br/>
       <span class="small">Nombre: <span id="refCode" class="ref"></span></span>
@@ -204,7 +206,7 @@
 
     const fmt = n => n.toFixed(2).replace(".", ",") + " €";
 
-    // Estado base (lo que trae el TPV para la mesa)
+    // Estado base
     const items = $$("#itemsList > li").map(li => ({
       el: li,
       name: li.dataset.name,
@@ -213,25 +215,12 @@
       selected: 0
     }));
 
-    // Calcular totales de mesa (€ y unidades)
-    function mesaImporteTotal(){
-      return items.reduce((acc,i)=> acc + i.price * i.total, 0);
-    }
-    function mesaUnidadesTotal(){
-      return items.reduce((acc,i)=> acc + i.total, 0);
-    }
+    function mesaImporteTotal(){ return items.reduce((a,i)=> a + i.price * i.total, 0); }
+    function mesaUnidadesTotal(){ return items.reduce((a,i)=> a + i.total, 0); }
+    function mesaUnidadesRestantes(){ return items.reduce((a,i)=> a + (i.total - i.selected), 0); }
+    function mesaImporteRestante(){ return items.reduce((a,i)=> a + (i.total - i.selected) * i.price, 0); }
+    function miImporte(){ return items.reduce((a,i)=> a + i.selected * i.price, 0); }
 
-    function mesaUnidadesRestantes(){
-      return items.reduce((acc,i)=> acc + (i.total - i.selected), 0);
-    }
-    function mesaImporteRestante(){
-      return items.reduce((acc,i)=> acc + (i.total - i.selected) * i.price, 0);
-    }
-    function miImporte(){
-      return items.reduce((acc,i)=> acc + i.selected * i.price, 0);
-    }
-
-    // Pintar cabecera y panel
     function refreshUI(){
       mesaTotalEl.textContent = "Total mesa: " + fmt(mesaImporteTotal());
       unitsLeftEl.textContent = mesaUnidadesRestantes() + " / " + mesaUnidadesTotal();
@@ -240,7 +229,6 @@
       myTotalEl.textContent = fmt(miImporte());
       confirmBtn.disabled = miImporte() <= 0;
 
-      // Por cada línea, actualizar “Quedan” y total de línea
       items.forEach(i=>{
         const left = i.total - i.selected;
         i.el.querySelector(".leftLine strong").textContent = left;
@@ -249,32 +237,38 @@
       });
     }
 
-    // Controles +/-
+    // Ripple en botones ±
+    function makeRip(e, btn){
+      const r = document.createElement('span');
+      r.className = 'rip';
+      const rect = btn.getBoundingClientRect();
+      r.style.left = (e.clientX - rect.left) + 'px';
+      r.style.top  = (e.clientY - rect.top)  + 'px';
+      btn.appendChild(r);
+      setTimeout(()=>r.remove(), 450);
+    }
+
     list.addEventListener("click", (e)=>{
       const act = e.target.dataset.act;
       if(!act) return;
       const li = e.target.closest("li");
       const it = items.find(x=>x.el===li);
       if(!it) return;
-      if(act === "+"){
-        // no permitir pasar de lo disponible
-        if(it.selected < it.total) it.selected++;
-      }else{
-        if(it.selected > 0) it.selected--;
-      }
+      if(act === "+"){ if(it.selected < it.total) it.selected++; }
+      else{ if(it.selected > 0) it.selected--; }
+      makeRip(e, e.target);
       refreshUI();
     });
 
-    // Inicial
     refreshUI();
 
-    // Confirmar → abrir modal
+    // Modal
     confirmBtn.addEventListener("click", ()=>{
-      overlay.style.display = "flex";
+      overlay.classList.add('show');
       overlay.setAttribute("aria-hidden","false");
     });
     closeBtn.addEventListener("click", ()=>{
-      overlay.style.display = "none";
+      overlay.classList.remove('show');
       overlay.setAttribute("aria-hidden","true");
     });
     overlay.addEventListener("click", (e)=>{ if(e.target===overlay) closeBtn.click(); });
@@ -282,42 +276,47 @@
     // Canal a Camarero
     const ch = new BroadcastChannel('pagoyo_demo');
 
+    // Toast
+    function toast(msg){
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(()=>{ t.style.transition='opacity .25s, transform .25s'; t.style.opacity=0; t.style.transform='translateY(-8px)'; }, 1800);
+      setTimeout(()=> t.remove(), 2100);
+    }
+
     // Elegir método y enviar
     $$(".opt").forEach(opt=>{
       opt.addEventListener("click", ()=>{
         const method = opt.dataset.method;
         const name = ($("#custName").value || "Cliente").trim();
-
-        // Construir string de items seleccionados
-        const itemsSel = items
-          .filter(i=> i.selected>0)
-          .map(i=> `${i.selected}× ${i.name}`)
-          .join(" · ");
-
-        // Importe
+        const itemsSel = items.filter(i=> i.selected>0).map(i=> `${i.selected}× ${i.name}`).join(" · ");
         const total = miImporte();
 
-        // Resumen local
         methodTxt.textContent = method;
         refCode.textContent = name;
         doneBox.style.display = "block";
         confirmBtn.textContent = "Parte confirmada";
         confirmBtn.disabled = true;
-        closeBtn.click();
+        overlay.classList.remove('show');
+        overlay.setAttribute("aria-hidden","true");
 
-        // Enviar al Panel Camarero
+        // Enviar
         ch.postMessage({
           type: 'partial_confirmed',
-          name,
-          method,
-          amount: fmt(total).replace(/\s/g,''), // "18,50 €"
+          name, method,
+          amount: fmt(total).replace(/\s/g,''),
           items: itemsSel,
           code: "M6-" + Math.random().toString(36).slice(2,6).toUpperCase()
         });
 
-        // Opcional: bloquear más cambios (demo)
+        // Bloquear cambios en la demo
         list.style.opacity = .6;
         list.style.pointerEvents = "none";
+
+        // Toast premium
+        toast('Selección confirmada — espera al camarero');
       });
     });
   </script>
