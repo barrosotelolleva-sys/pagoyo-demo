@@ -78,36 +78,50 @@
     <footer><p><a href="../">⬅ Volver al inicio</a></p></footer>
   </main>
 
-  <script>
-    const paymentsList = document.getElementById('paymentsList');
-    const pendingCount = document.getElementById('pendingCount');
-    let pending = 2; // contador demo inicial
+ <script>
+  const paymentsList = document.getElementById('paymentsList');
+  const pendingCount = document.getElementById('pendingCount');
+  let pending = 2; // contador demo inicial
 
-    function addPendingRow({code, amount, items, method}) {
-      const badgeClass = method === 'Efectivo' ? 'cash' : 'cardm';
-      const row = document.createElement('div');
-      row.className = 'row';
-      row.innerHTML = `
-        <div class="left">
-          <span class="id">Parcial #${code} • ${amount}</span>
-          <span class="items">${items}</span>
-        </div>
-        <span class="badge ${badgeClass}">${method}</span>
-        <button class="btn">Marcar cobrado</button>
-      `;
-      paymentsList.prepend(row);
-      pending++;
+  function addPendingRow({code, amount, items, method}) {
+    const badgeClass = method === 'Efectivo' ? 'cash' : 'cardm';
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `
+      <div class="left">
+        <span class="id">Parcial #${code} • ${amount}</span>
+        <span class="items">${items}</span>
+      </div>
+      <span class="badge ${badgeClass}">${method}</span>
+      <button class="btn">Marcar cobrado</button>
+    `;
+    paymentsList.prepend(row);
+    pending++;
+    pendingCount.textContent = 'Pendientes: ' + pending;
+    attachButton(row.querySelector(".btn"));
+  }
+
+  // Manejador de "Marcar cobrado"
+  function attachButton(btn) {
+    btn.addEventListener("click", () => {
+      btn.disabled = true;
+      btn.textContent = "Cobrado";
+      btn.previousElementSibling.className = "badge paid";
+      btn.previousElementSibling.textContent = "Cobrado";
+      pending = Math.max(0, pending - 1);
       pendingCount.textContent = 'Pendientes: ' + pending;
-    }
+    });
+  }
 
-    // Escucha desde la otra pestaña (Cliente)
-    const ch = new BroadcastChannel('pagoyo_demo');
-    ch.onmessage = (e) => {
-      const data = e.data || {};
-      if (data.type === 'partial_confirmed') {
-        addPendingRow(data);
-      }
-    };
-  </script>
-</body>
+  // Conectar todos los botones iniciales
+  document.querySelectorAll(".btn").forEach(attachButton);
+
+  // Escucha desde la otra pestaña (Cliente)
+  const ch = new BroadcastChannel('pagoyo_demo');
+  ch.onmessage = (e) => {
+    const data = e.data || {};
+    if (data.type === 'partial_confirmed') addPendingRow(data);
+  };
+</script>
+ </body>
 </html>
