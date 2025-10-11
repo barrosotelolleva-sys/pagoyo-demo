@@ -105,31 +105,34 @@
     const ch = new BroadcastChannel('pagoyo_demo');
 
     // Selección de método
-    document.querySelectorAll(".opt").forEach(el=>{
-      el.addEventListener("click", ()=>{
-        const method = el.getAttribute("data-method");
-        const code = "M6-" + Math.random().toString(36).slice(2,6).toUpperCase();
+   document.querySelectorAll(".opt").forEach(el=>{
+  el.addEventListener("click", ()=>{
+    const method = el.getAttribute("data-method");
+    const name = (document.getElementById("custName").value || "Cliente").trim();
+    const code = "M6-" + Math.random().toString(36).slice(2,6).toUpperCase(); // lo mantenemos interno por si lo quieres
 
-        // Mostrar resumen local
-        methodTxt.textContent = method;
-        refCode.textContent = code;
-        doneBox.style.display = "block";
-        confirmBtn.textContent = "Parte confirmada";
-        confirmBtn.disabled = true;
+    // Mostrar resumen local
+    methodTxt.textContent = method;
+    refCode.textContent = name; // mostramos el nombre en el resumen
+    doneBox.style.display = "block";
+    confirmBtn.textContent = "Seleccionado";
+    confirmBtn.disabled = true;
 
-        // Cerrar modal
-        closeBtn.click();
+    // Cerrar modal
+    closeBtn.click();
 
-        // Enviar al Panel Camarero (otra pestaña)
-        ch.postMessage({
-          type: 'partial_confirmed',
-          method,                       // "Efectivo" o "Tarjeta"
-          amount: '18,50 €',            // Importe de ejemplo
-          items: '1× Calamares · 2× Refresco',
-          code
-        });
-      });
+    // Enviar al Panel Camarero (nombre + método)
+    const ch = new BroadcastChannel('pagoyo_demo');
+    ch.postMessage({
+      type: 'partial_confirmed',
+      name,                        // ← nombre del cliente
+      method,                      // "Efectivo" o "Tarjeta"
+      amount: '18,50 €',           // Importe demo (luego haremos cantidades por ítem)
+      items: '1× Calamares · 2× Refresco',
+      code
     });
-  </script>
+  });
+});
+ </script>
 </body>
 </html>
