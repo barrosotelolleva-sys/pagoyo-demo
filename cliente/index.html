@@ -64,13 +64,17 @@
   <!-- Modal -->
   <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal">
-      <h3>Elige método de pago</h3>
-      <div class="options">
-        <div class="opt cash" data-method="Efectivo">💵 Efectivo</div>
-        <div class="opt card" data-method="Tarjeta">💳 Tarjeta</div>
-      </div>
-      <button id="closeBtn" class="close">Cancelar</button>
-    </div>
+     <h3>Elige qué pagar</h3>
+<div class="options">
+  <div class="opt cash" data-method="Efectivo">💵 Efectivo</div>
+  <div class="opt card" data-method="Tarjeta">💳 Tarjeta</div>
+</div>
+<div style="margin-top:10px">
+  <label for="custName" style="display:block;font-weight:700;margin-bottom:6px;color:#0F766E">Tu nombre (para el camarero)</label>
+  <input id="custName" type="text" placeholder="Ej. Juan" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px" />
+</div>
+<button id="closeBtn" class="close">Cancelar</button>
+     </div>
   </div>
 
   <script>
