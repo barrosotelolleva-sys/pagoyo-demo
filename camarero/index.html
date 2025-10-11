@@ -43,6 +43,11 @@
 
   <main class="grid">
     <!-- TOTALES (con IDs para actualizarlos) -->
+    <div id="closeBanner" style="display:none;background:#ecfdf5;border:1px solid #86efac;color:#166534;
+padding:12px;border-radius:12px;text-align:center;font-weight:700;font-size:17px;">
+  ✅ Mesa lista para cerrar
+</div>
+
     <section class="totals">
       <div class="card"><div class="label">Total TPV</div><div id="tpvTotal" class="value">69,90 €</div></div>
       <div class="card"><div class="label">Total asignado</div><div id="assignedTotal" class="value">45,70 €</div></div>
@@ -113,11 +118,16 @@
     let totalAssigned = initial.assigned;
 
     function refreshTotals() {
-      assignedEl.textContent = numToEuro(totalAssigned);
-      const totalPending = Math.max(0, totalTPV - totalAssigned);
-      pendingEl.textContent  = numToEuro(totalPending);
-      pendingEl.style.color  = totalPending > 0 ? '#ef4444' : '#16a34a';
-    }
+  assignedEl.textContent = numToEuro(totalAssigned);
+  const totalPending = Math.max(0, totalTPV - totalAssigned);
+  pendingEl.textContent  = numToEuro(totalPending);
+  pendingEl.style.color  = totalPending > 0 ? '#ef4444' : '#16a34a';
+
+  // Mostrar/ocultar aviso de mesa lista
+  const banner = document.getElementById('closeBanner');
+  banner.style.display = totalPending === 0 ? 'block' : 'none';
+}
+
     // Contador pendientes inicial
     let pending = document.querySelectorAll('.row .btn:not([disabled])').length;
     pendingCount.textContent = 'Pendientes: ' + pending;
