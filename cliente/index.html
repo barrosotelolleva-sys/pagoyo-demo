@@ -5,15 +5,36 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PagoYo — Vista Cliente</title>
   <style>
-    body{font-family:system-ui,Arial,sans-serif;background:#f4f6f8;margin:0;padding:40px;text-align:center;color:#111}
-    h1{color:#0F766E;margin-bottom:0}
-    p{max-width:600px;margin:8px auto;font-size:16px;color:#333}
-    a{color:#0F766E;text-decoration:none;font-weight:600}
+    :root { --teal:#0F766E; --orange:#E67E22; --bg:#F4F6F8; }
+    body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:#111;}
+    header{background:var(--teal);color:#fff;padding:14px;text-align:center;font-size:20px;font-weight:600;}
+    main{max-width:700px;margin:auto;padding:20px;}
+    h2{margin:14px 0 6px;color:var(--teal);}
+    ul{list-style:none;padding:0;margin:0;}
+    li{display:flex;justify-content:space-between;padding:10px 8px;margin-bottom:6px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+    .total{display:flex;justify-content:space-between;margin-top:16px;padding:12px;background:#fff;border-radius:10px;font-weight:700;color:#0F766E;}
+    .btn{margin-top:20px;display:block;width:100%;background:var(--orange);color:#fff;font-weight:600;padding:14px;border:none;border-radius:12px;font-size:16px;cursor:pointer;}
+    .btn:hover{opacity:.9;}
+    footer{text-align:center;margin-top:20px;}
+    a{color:var(--teal);text-decoration:none;font-weight:600;}
   </style>
 </head>
 <body>
-  <h1>Vista Cliente</h1>
-  <p>Esta es la vista donde el cliente ve el ticket de la mesa, selecciona sus consumiciones y confirma el método de pago.</p>
-  <p><a href="../">⬅ Volver al inicio</a></p>
+  <header>Mesa 6 — Ticket de ejemplo</header>
+  <main>
+    <h2>Consumiciones</h2>
+    <ul>
+      <li><span>3× Ración Calamares</span><span>28,50 €</span></li>
+      <li><span>6× Refrescos</span><span>13,20 €</span></li>
+      <li><span>2× Ración Patatas</span><span>12,00 €</span></li>
+      <li><span>4× Cañas</span><span>7,20 €</span></li>
+      <li><span>2× Tarta de Queso</span><span>9,00 €</span></li>
+    </ul>
+    <div class="total">
+      <span>Total Mesa</span><span>69,90 €</span>
+    </div>
+    <button class="btn">Confirmar mi parte</button>
+    <footer><p><a href="../">⬅ Volver al inicio</a></p></footer>
+  </main>
 </body>
 </html>
