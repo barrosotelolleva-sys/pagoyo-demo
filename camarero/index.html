@@ -156,23 +156,25 @@ padding:12px;border-radius:12px;text-align:center;font-weight:700;font-size:17px
     document.querySelectorAll(".row .btn").forEach(attachButton);
 
     // --- Al confirmar cliente: solo añadir fila y subir contador (NO €)
-    function addPendingRow({code, amount, items, method}) {
-      const badgeClass = method === 'Efectivo' ? 'cash' : 'cardm';
-      const row = document.createElement('div');
-      row.className = 'row';
-      row.innerHTML = `
-        <div class="left">
-          <span class="id">Parcial #${code} • ${amount}</span>
-          <span class="items">${items}</span>
-        </div>
-        <span class="badge ${badgeClass}">${method}</span>
-        <button class="btn">Marcar cobrado</button>
-      `;
-      paymentsList.prepend(row);
-      pending++;
-      pendingCount.textContent = 'Pendientes: ' + pending;
-      attachButton(row.querySelector(".btn"));
-    }
+   function addPendingRow({code, amount, items, method, name}) {
+  const badgeClass = method === 'Efectivo' ? 'cash' : 'cardm';
+  const who = name ? ` de ${name}` : '';
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `
+    <div class="left">
+      <span class="id">Parcial${who} #${code} • ${amount}</span>
+      <span class="items">${items}</span>
+    </div>
+    <span class="badge ${badgeClass}">${method}</span>
+    <button class="btn">Marcar cobrado</button>
+  `;
+  paymentsList.prepend(row);
+  pending++;
+  pendingCount.textContent = 'Pendientes: ' + pending;
+  attachButton(row.querySelector(".btn"));
+}
+
 
     // --- Canal entre pestañas
     const ch = new BroadcastChannel('pagoyo_demo');
