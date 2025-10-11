@@ -42,164 +42,118 @@
   </header>
 
   <main class="grid">
-    <!-- TOTALES (con IDs para actualizarlos) -->
+    <!-- TOTALES -->
+    <section class="totals">
+      <div class="card"><div class="label">Total TPV</div><div id="tpvTotal" class="value">69,90 €</div></div>
+      <div class="card"><div class="label">Total cobrado</div><div id="paidTotal" class="value">0,00 €</div></div>
+      <div class="card"><div class="label">Total pendiente cobrar</div><div id="pendingTotal" class="value" style="color:#ef4444">69,90 €</div></div>
+    </section>
+
+    <!-- AVISO CIERRE -->
     <div id="closeBanner" style="display:none;background:#ecfdf5;border:1px solid #86efac;color:#166534;
-padding:12px;border-radius:12px;text-align:center;font-weight:700;font-size:17px;">
-  ✅ Mesa lista para cerrar
-</div>
+      padding:12px;border-radius:12px;text-align:center;font-weight:700;font-size:17px;">
+      ✅ Mesa lista para cerrar
+    </div>
 
- <section class="totals">
-  <div class="card"><div class="label">Total TPV</div><div id="tpvTotal" class="value">69,90 €</div></div>
-  <div class="card"><div class="label">Total cobrado</div><div id="paidTotal" class="value">45,70 €</div></div>
-  <div class="card"><div class="label">Total pendiente cobrar</div><div id="pendingTotal" class="value" style="color:#ef4444">24,20 €</div></div>
-</section>
-
-   
-
-    <!-- LISTA PAGOS -->
+    <!-- PAGOS -->
     <section class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <h3 style="margin:0;color:#0F766E">Pagos</h3>
-        <span id="pendingCount" class="badge card-badge">Pendientes: 2</span>
+        <span id="pendingCount" class="badge card-badge">Pendientes: 0</span>
       </div>
       <div id="paymentsList" class="list">
-        <div class="row">
-          <div class="left">
-            <span class="id">Parcial #A1 • 18,50 €</span>
-            <span class="items">1× Calamares · 2× Refresco</span>
-          </div>
-          <span class="badge cardm">Tarjeta</span>
-          <button class="btn">Marcar cobrado</button>
-        </div>
-
-        <div class="row">
-          <div class="left">
-            <span class="id">Parcial #B2 • 27,20 €</span>
-            <span class="items">1× Calamares · 1× Patatas · 2× Caña</span>
-          </div>
-          <span class="badge cash">Efectivo</span>
-          <button class="btn">Marcar cobrado</button>
-        </div>
-
-        <div class="row">
-          <div class="left">
-            <span class="id">Parcial #C3 • 24,20 €</span>
-            <span class="items">1× Calamares · 2× Refresco · 2× Tarta</span>
-          </div>
-          <span class="badge paid">Cobrado</span>
-          <button class="btn" disabled>Cobrado</button>
-        </div>
+        <!-- sin ejemplos; se llenará cuando Cliente confirme -->
       </div>
     </section>
 
     <footer><p><a href="../">⬅ Volver al inicio</a></p></footer>
   </main>
 
- <script>
-  // --- Utils € ↔ número
-  const euroToNum = (s) =>
-    parseFloat(s.replace(/\./g,'').replace(',', '.').replace(/[^\d.]/g,'')) || 0;
-  const numToEuro = (n) => n.toFixed(2).replace('.', ',') + ' €';
+  <script>
+    // Utils € ↔ número
+    const euroToNum = (s) =>
+      parseFloat(s.replace(/\./g,'').replace(',', '.').replace(/[^\d.]/g,'')) || 0;
+    const numToEuro = (n) => n.toFixed(2).replace('.', ',') + ' €';
 
-  // --- Elementos
-  const paymentsList  = document.getElementById('paymentsList');
-  const pendingCount  = document.getElementById('pendingCount');
-  const tpvEl         = document.getElementById('tpvTotal');
-  const paidEl        = document.getElementById('paidTotal');      // ← antes era assigned
-  const pendingEl     = document.getElementById('pendingTotal');
-  const resetBtn      = document.getElementById('resetBtn');
+    // Elementos
+    const paymentsList  = document.getElementById('paymentsList');
+    const pendingCount  = document.getElementById('pendingCount');
+    const tpvEl         = document.getElementById('tpvTotal');
+    const paidEl        = document.getElementById('paidTotal');
+    const pendingEl     = document.getElementById('pendingTotal');
+    const resetBtn      = document.getElementById('resetBtn');
+    const banner        = document.getElementById('closeBanner');
 
-  // --- Estados iniciales
-  const initial = {
-    tpv:   euroToNum(tpvEl.textContent),   // 69,90
-    paid:  euroToNum(paidEl.textContent),  // 45,70
-    listHTML: document.getElementById('paymentsList').innerHTML
-  };
+    // Estados
+    const initialTPV  = euroToNum(tpvEl.textContent);   // 69,90 €
+    let totalTPV      = initialTPV;
+    let totalPaid     = 0;                               // empieza en 0,00 €
+    let pending       = 0;                               // sin filas hasta que llegue cliente
 
-  let totalTPV  = initial.tpv;
-  let totalPaid = initial.paid; // ← ahora trabajamos con "cobrado"
+    function refreshTotals() {
+      paidEl.textContent = numToEuro(totalPaid);
+      const totalPending = Math.max(0, totalTPV - totalPaid);
+      pendingEl.textContent  = numToEuro(totalPending);
+      pendingEl.style.color  = totalPending > 0 ? '#ef4444' : '#16a34a';
+      banner.style.display   = totalPending === 0 ? 'block' : 'none';
+      pendingCount.textContent = 'Pendientes: ' + pending;
+    }
+    refreshTotals();
 
-  // Contador de pendientes = botones activos
-  let pending = document.querySelectorAll('.row .btn:not([disabled])').length;
+    // Añadir una fila pendiente desde Cliente (NO toca €)
+    function addPendingRow({code, amount, items, method, name}) {
+      const badgeClass = method === 'Efectivo' ? 'cash' : 'cardm';
+      const who = name ? ` de ${name}` : '';
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <div class="left">
+          <span class="id">Parcial${who} #${code} • ${amount}</span>
+          <span class="items">${items || ''}</span>
+        </div>
+        <span class="badge ${badgeClass}">${method}</span>
+        <button class="btn">Marcar cobrado</button>
+      `;
+      paymentsList.prepend(row);
+      pending++;
+      refreshTotals();
+      attachButton(row.querySelector(".btn"));
+    }
 
-  function refreshTotals() {
-    paidEl.textContent = numToEuro(totalPaid);
-    const totalPending = Math.max(0, totalTPV - totalPaid);
-    pendingEl.textContent  = numToEuro(totalPending);
-    pendingEl.style.color  = totalPending > 0 ? '#ef4444' : '#16a34a';
-    // Banner "mesa lista"
-    const banner = document.getElementById('closeBanner');
-    if (banner) banner.style.display = totalPending === 0 ? 'block' : 'none';
-    // Contador
-    pendingCount.textContent = 'Pendientes: ' + pending;
-  }
+    // Marcar cobrado → sube Total cobrado, baja Pendiente
+    function attachButton(btn) {
+      btn.addEventListener("click", () => {
+        const idLine = btn.parentElement.querySelector('.id').textContent;
+        const m = idLine.match(/•\s*([\d.,]+)\s*€/);
+        const amountNum = m ? euroToNum(m[1] + ' €') : 0;
 
-  // --- Marcar cobrado: aquí sí cambian €
-  function attachButton(btn) {
-    btn.addEventListener("click", () => {
-      const idLine = btn.parentElement.querySelector('.id').textContent;
-      const m = idLine.match(/•\s*([\d.,]+)\s*€/);
-      const amountNum = m ? euroToNum(m[1] + ' €') : 0;
+        btn.disabled = true;
+        btn.textContent = "Cobrado";
+        btn.previousElementSibling.className = "badge paid";
+        btn.previousElementSibling.textContent = "Cobrado";
 
-      btn.disabled = true;
-      btn.textContent = "Cobrado";
-      btn.previousElementSibling.className = "badge paid";
-      btn.previousElementSibling.textContent = "Cobrado";
+        pending = Math.max(0, pending - 1);
+        totalPaid = Math.min(totalTPV, totalPaid + amountNum);
+        refreshTotals();
+      });
+    }
 
-      pending = Math.max(0, pending - 1);
+    // Canal Cliente → Camarero
+    const ch = new BroadcastChannel('pagoyo_demo');
+    ch.onmessage = (e) => {
+      const data = e.data || {};
+      if (data.type === 'partial_confirmed') addPendingRow(data);
+    };
 
-      // Actualiza totales (€): sube COBRADO, y "Pendiente cobrar" se recalcula
-      totalPaid = Math.min(totalTPV, totalPaid + amountNum);
+    // Reset demo → limpia lista y vuelve a 0 cobrado / TPV íntegro pendiente
+    resetBtn.addEventListener('click', () => {
+      paymentsList.innerHTML = '';
+      totalTPV  = initialTPV;
+      totalPaid = 0;
+      pending   = 0;
       refreshTotals();
     });
-  }
-
-  // Conectar botones existentes al cargar
-  document.querySelectorAll(".row .btn").forEach(attachButton);
-
-  // --- Al confirmar cliente: solo añadir fila y subir contador (NO €)
-  function addPendingRow({code, amount, items, method, name}) {
-    const badgeClass = method === 'Efectivo' ? 'cash' : 'cardm';
-    const who = name ? ` de ${name}` : '';
-    const row = document.createElement('div');
-    row.className = 'row';
-    row.innerHTML = `
-      <div class="left">
-        <span class="id">Parcial${who} #${code} • ${amount}</span>
-        <span class="items">${items}</span>
-      </div>
-      <span class="badge ${badgeClass}">${method}</span>
-      <button class="btn">Marcar cobrado</button>
-    `;
-    paymentsList.prepend(row);
-    pending++;
-    refreshTotals();      // ← solo actualiza contador; € no cambian
-    attachButton(row.querySelector(".btn"));
-  }
-
-  // --- Canal entre pestañas
-  const ch = new BroadcastChannel('pagoyo_demo');
-  ch.onmessage = (e) => {
-    const data = e.data || {};
-    if (data.type === 'partial_confirmed') addPendingRow(data);
-  };
-
-  // --- Reset demo
-  resetBtn.addEventListener('click', () => {
-    totalTPV  = initial.tpv;
-    totalPaid = initial.paid;
-    document.getElementById('paymentsList').innerHTML = initial.listHTML;
-
-    // Recontar y reenganchar
-    pending = document.querySelectorAll('.row .btn:not([disabled])').length;
-    document.querySelectorAll(".row .btn").forEach(attachButton);
-    refreshTotals();
-  });
-
-  // Inicializar UI
-  refreshTotals();
-</script>
- 
+  </script>
 </body>
 </html>
 
