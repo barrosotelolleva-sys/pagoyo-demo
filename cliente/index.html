@@ -81,6 +81,16 @@
     const doneBox = $("#doneBox");
     const methodTxt = $("#methodTxt");
     const refCode = $("#refCode");
+    // Canal de comunicación entre pestañas (demo)
+const ch = new BroadcastChannel('pagoyo_demo');
+ch.postMessage({
+  type: 'partial_confirmed',
+  method,                       // "Efectivo" o "Tarjeta"
+  amount: '18,50 €',            // Importe demo
+  items: '1× Calamares · 2× Refresco',
+  code
+});
+
 
     confirmBtn.addEventListener("click", () => {
       overlay.style.display = "flex";
