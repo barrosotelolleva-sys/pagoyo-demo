@@ -12,14 +12,18 @@
     main{max-width:700px;margin:auto;padding:20px;}
     h2{margin:14px 0 6px;color:var(--teal);}
     ul{list-style:none;padding:0;margin:0;}
-    li{display:flex;justify-content:space-between;padding:10px 8px;margin-bottom:6px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+    li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 8px;margin-bottom:6px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+    .info{flex:1;}
+    .controls{display:flex;align-items:center;gap:8px;}
+    .btnSmall{width:28px;height:28px;border:none;border-radius:8px;background:#eee;font-weight:700;cursor:pointer;}
+    .btnSmall:hover{background:#ddd;}
+    .qty{min-width:24px;text-align:center;font-weight:600;}
     .total{display:flex;justify-content:space-between;margin-top:16px;padding:12px;background:#fff;border-radius:10px;font-weight:700;color:#0F766E;}
-    .btn{margin-top:20px;display:block;width:100%;background:var(--orange);color:#fff;font-weight:600;padding:14px;border:none;border-radius:12px;font-size:16px;cursor:pointer;}
-    .btn:hover{opacity:.95}
+    .btnMain{margin-top:20px;display:block;width:100%;background:var(--orange);color:#fff;font-weight:600;padding:14px;border:none;border-radius:12px;font-size:16px;cursor:pointer;}
+    .btnMain:hover{opacity:.95}
     footer{text-align:center;margin-top:20px;}
     a{color:var(--teal);text-decoration:none;font-weight:600}
-
-    /* Modal simple */
+    /* Modal */
     .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:18px;}
     .modal{width:min(520px,92vw);background:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:18px;border:1px solid rgba(15,118,110,.15)}
     .modal h3{margin:0 0 10px;color:#0F766E}
@@ -29,52 +33,86 @@
     .opt.cash{background:#fff8ee}
     .opt.card{background:#eff6ff}
     .close{margin-top:12px;display:block;width:100%;background:#111;color:#fff;border:none;border-radius:10px;padding:10px;cursor:pointer}
-
-    /* Resumen final */
+    /* Resumen */
     .done{display:none;margin-top:16px;padding:14px;background:#ecfdf5;border:1px solid #86efac;border-radius:12px}
     .small{color:#444;font-size:14px;margin-top:6px}
     .ref{font-weight:800;color:#0F766E}
   </style>
 </head>
 <body>
-  <header>Mesa 6 — Ticket de ejemplo</header>
+  <header>Mesa 6 — Elige qué pagar</header>
   <main>
     <h2>Consumiciones</h2>
-    <ul>
-      <li><span>3× Ración Calamares</span><span>28,50 €</span></li>
-      <li><span>6× Refrescos</span><span>13,20 €</span></li>
-      <li><span>2× Ración Patatas</span><span>12,00 €</span></li>
-      <li><span>4× Cañas</span><span>7,20 €</span></li>
-      <li><span>2× Tarta de Queso</span><span>9,00 €</span></li>
+    <ul id="itemsList">
+      <li data-price="9.50" data-name="Ración Calamares">
+        <div class="info"><span>Ración Calamares</span><br><small>9,50 € unidad</small></div>
+        <div class="controls">
+          <button class="btnSmall" data-act="-">−</button>
+          <span class="qty">0</span>
+          <button class="btnSmall" data-act="+">+</button>
+        </div>
+      </li>
+      <li data-price="2.20" data-name="Refresco">
+        <div class="info"><span>Refresco</span><br><small>2,20 € unidad</small></div>
+        <div class="controls">
+          <button class="btnSmall" data-act="-">−</button>
+          <span class="qty">0</span>
+          <button class="btnSmall" data-act="+">+</button>
+        </div>
+      </li>
+      <li data-price="6.00" data-name="Ración Patatas">
+        <div class="info"><span>Ración Patatas</span><br><small>6,00 € unidad</small></div>
+        <div class="controls">
+          <button class="btnSmall" data-act="-">−</button>
+          <span class="qty">0</span>
+          <button class="btnSmall" data-act="+">+</button>
+        </div>
+      </li>
+      <li data-price="1.80" data-name="Caña">
+        <div class="info"><span>Caña</span><br><small>1,80 € unidad</small></div>
+        <div class="controls">
+          <button class="btnSmall" data-act="-">−</button>
+          <span class="qty">0</span>
+          <button class="btnSmall" data-act="+">+</button>
+        </div>
+      </li>
+      <li data-price="4.50" data-name="Tarta de Queso">
+        <div class="info"><span>Tarta de Queso</span><br><small>4,50 € unidad</small></div>
+        <div class="controls">
+          <button class="btnSmall" data-act="-">−</button>
+          <span class="qty">0</span>
+          <button class="btnSmall" data-act="+">+</button>
+        </div>
+      </li>
     </ul>
-    <div class="total">
-      <span>Total Mesa</span><span>69,90 €</span>
-    </div>
-
-    <button id="confirmBtn" class="btn">Elige que Pagar</button>
+    <div class="total"><span>Mi total</span><span id="myTotal">0,00 €</span></div>
+    <button id="confirmBtn" class="btnMain">Confirmar y pagar</button>
 
     <div id="doneBox" class="done">
       ✔ Tu parte está lista. Método: <span id="methodTxt" class="ref">—</span><br/>
-      <span class="small">Enseña este código si te lo piden: <span id="refCode" class="ref"></span></span>
+      <span class="small">Nombre: <span id="refCode" class="ref"></span></span>
     </div>
 
     <footer><p><a href="../">⬅ Volver al inicio</a></p></footer>
   </main>
 
   <!-- Modal -->
-  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div id="overlay" class="overlay">
     <div class="modal">
-     <h3>Elige qué pagar</h3>
-<div class="options">
-  <div class="opt cash" data-method="Efectivo">💵 Efectivo</div>
-  <div class="opt card" data-method="Tarjeta">💳 Tarjeta</div>
-</div>
-<div style="margin-top:10px">
-  <label for="custName" style="display:block;font-weight:700;margin-bottom:6px;color:#0F766E">Tu nombre (para el camarero)</label>
-  <input id="custName" type="text" placeholder="Ej. Juan" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px" />
-</div>
-<button id="closeBtn" class="close">Cancelar</button>
-     </div>
+      <h3>Selecciona método de pago</h3>
+      <div class="options">
+        <div class="opt cash" data-method="Efectivo">💵 Efectivo</div>
+        <div class="opt card" data-method="Tarjeta">💳 Tarjeta</div>
+      </div>
+      <div style="margin-top:10px">
+        <label for="custName" style="display:block;font-weight:700;margin-bottom:6px;color:#0F766E">
+          Tu nombre (para el camarero)
+        </label>
+        <input id="custName" type="text" placeholder="Ej. Juan"
+          style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px" />
+      </div>
+      <button id="closeBtn" class="close">Cancelar</button>
+    </div>
   </div>
 
   <script>
@@ -85,54 +123,75 @@
     const doneBox = $("#doneBox");
     const methodTxt = $("#methodTxt");
     const refCode = $("#refCode");
+    const totalEl = $("#myTotal");
+    const list = $("#itemsList");
 
-    // Abrir modal
-    confirmBtn.addEventListener("click", () => {
-      overlay.style.display = "flex";
-      overlay.setAttribute("aria-hidden","false");
+    // --- calcular total
+    function calcTotal() {
+      let total = 0;
+      list.querySelectorAll("li").forEach(li=>{
+        const price = parseFloat(li.dataset.price);
+        const qty = parseInt(li.querySelector(".qty").textContent);
+        total += price * qty;
+      });
+      totalEl.textContent = total.toFixed(2).replace(".", ",")+" €";
+      return total;
+    }
+    list.addEventListener("click",e=>{
+      if(e.target.dataset.act){
+        const li = e.target.closest("li");
+        const qtyEl = li.querySelector(".qty");
+        let q = parseInt(qtyEl.textContent);
+        q += e.target.dataset.act==="+"?1:-1;
+        q = Math.max(0,q);
+        qtyEl.textContent = q;
+        calcTotal();
+      }
     });
 
-    // Cerrar modal
-    closeBtn.addEventListener("click", () => {
-      overlay.style.display = "none";
-      overlay.setAttribute("aria-hidden","true");
+    confirmBtn.addEventListener("click", ()=>{
+      const total = calcTotal();
+      if(total<=0){alert("Selecciona al menos una consumición.");return;}
+      overlay.style.display="flex";
     });
-    overlay.addEventListener("click", (e) => {
-      if(e.target === overlay) closeBtn.click();
-    });
+    closeBtn.addEventListener("click", ()=> overlay.style.display="none");
+    overlay.addEventListener("click", e=>{ if(e.target===overlay) closeBtn.click(); });
 
-    // Canal de comunicación para la demo (misma tablet, otra pestaña)
+    // Canal entre pestañas
     const ch = new BroadcastChannel('pagoyo_demo');
 
-    // Selección de método
-   document.querySelectorAll(".opt").forEach(el=>{
-  el.addEventListener("click", ()=>{
-    const method = el.getAttribute("data-method");
-    const name = (document.getElementById("custName").value || "Cliente").trim();
-    const code = "M6-" + Math.random().toString(36).slice(2,6).toUpperCase(); // lo mantenemos interno por si lo quieres
+    // Elegir método
+    document.querySelectorAll(".opt").forEach(opt=>{
+      opt.addEventListener("click", ()=>{
+        const method = opt.dataset.method;
+        const name = ($("#custName").value || "Cliente").trim();
+        const total = calcTotal();
+        const itemsSel = [...list.querySelectorAll("li")]
+          .filter(li=>parseInt(li.querySelector(".qty").textContent)>0)
+          .map(li=>{
+            const q=li.querySelector(".qty").textContent;
+            const n=li.dataset.name;
+            return `${q}× ${n}`;
+          }).join(" · ");
 
-    // Mostrar resumen local
-    methodTxt.textContent = method;
-    refCode.textContent = name; // mostramos el nombre en el resumen
-    doneBox.style.display = "block";
-    confirmBtn.textContent = "Seleccionado";
-    confirmBtn.disabled = true;
+        // Mostrar resumen
+        methodTxt.textContent=method;
+        refCode.textContent=name;
+        doneBox.style.display="block";
+        confirmBtn.textContent="Parte confirmada";
+        confirmBtn.disabled=true;
+        closeBtn.click();
 
-    // Cerrar modal
-    closeBtn.click();
-
-    // Enviar al Panel Camarero (nombre + método)
-    const ch = new BroadcastChannel('pagoyo_demo');
-    ch.postMessage({
-      type: 'partial_confirmed',
-      name,                        // ← nombre del cliente
-      method,                      // "Efectivo" o "Tarjeta"
-      amount: '18,50 €',           // Importe demo (luego haremos cantidades por ítem)
-      items: '1× Calamares · 2× Refresco',
-      code
+        // Enviar al camarero
+        ch.postMessage({
+          type:"partial_confirmed",
+          name,method,
+          amount:total.toFixed(2).replace(".",",")+" €",
+          items:itemsSel,
+          code:"M6-"+Math.random().toString(36).slice(2,6).toUpperCase()
+        });
+      });
     });
-  });
-});
- </script>
+  </script>
 </body>
 </html>
