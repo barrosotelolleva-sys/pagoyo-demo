@@ -81,46 +81,49 @@
     const doneBox = $("#doneBox");
     const methodTxt = $("#methodTxt");
     const refCode = $("#refCode");
-    // Canal de comunicación entre pestañas (demo)
-const ch = new BroadcastChannel('pagoyo_demo');
-ch.postMessage({
-  type: 'partial_confirmed',
-  method,                       // "Efectivo" o "Tarjeta"
-  amount: '18,50 €',            // Importe demo
-  items: '1× Calamares · 2× Refresco',
-  code
-});
 
-
+    // Abrir modal
     confirmBtn.addEventListener("click", () => {
       overlay.style.display = "flex";
       overlay.setAttribute("aria-hidden","false");
     });
 
+    // Cerrar modal
     closeBtn.addEventListener("click", () => {
       overlay.style.display = "none";
       overlay.setAttribute("aria-hidden","true");
     });
-
     overlay.addEventListener("click", (e) => {
       if(e.target === overlay) closeBtn.click();
     });
 
+    // Canal de comunicación para la demo (misma tablet, otra pestaña)
+    const ch = new BroadcastChannel('pagoyo_demo');
+
+    // Selección de método
     document.querySelectorAll(".opt").forEach(el=>{
       el.addEventListener("click", ()=>{
         const method = el.getAttribute("data-method");
-        // Genera un código de referencia simple, visual para la demo
         const code = "M6-" + Math.random().toString(36).slice(2,6).toUpperCase();
+
+        // Mostrar resumen local
         methodTxt.textContent = method;
         refCode.textContent = code;
-
-        // Muestra resumen
         doneBox.style.display = "block";
         confirmBtn.textContent = "Parte confirmada";
         confirmBtn.disabled = true;
 
-        // Cierra modal
+        // Cerrar modal
         closeBtn.click();
+
+        // Enviar al Panel Camarero (otra pestaña)
+        ch.postMessage({
+          type: 'partial_confirmed',
+          method,                       // "Efectivo" o "Tarjeta"
+          amount: '18,50 €',            // Importe de ejemplo
+          items: '1× Calamares · 2× Refresco',
+          code
+        });
       });
     });
   </script>
