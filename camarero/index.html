@@ -28,54 +28,53 @@
     .paid{background:#ecfdf5;color:#16a34a;border:1px solid #86efac}
     .btn{border:none;background:var(--teal);color:#fff;font-weight:700;padding:10px 12px;border-radius:10px;cursor:pointer}
     .btn:disabled{background:#ddd;color:#666;cursor:default}
+    .flash{animation:flash .6s ease-out}
+    @keyframes flash{from{box-shadow:0 0 0 rgba(15,118,110,0)}to{box-shadow:0 0 0 8px rgba(15,118,110,.12)}}
     footer{text-align:center;margin-top:14px}
     a{color:#0F766E;text-decoration:none;font-weight:600}
     @media (max-width:720px){.totals{grid-template-columns:1fr}}
+    .tiny{font-size:12px;opacity:.7}
   </style>
 </head>
 <body>
   <header>
     <div class="bar">
       <span>Mesa 6 — Panel Camarero</span>
-      <button id="resetBtn" class="btn" style="background:#111">Reset demo</button>
+      <div>
+        <a id="demoAdd" class="tiny" href="#" style="display:none;margin-right:8px;color:#fff;text-decoration:underline">➕ parcial demo</a>
+        <button id="resetBtn" class="btn" style="background:#111">Reset demo</button>
+      </div>
     </div>
   </header>
 
   <main class="grid">
-    <!-- TOTALES -->
     <section class="totals">
       <div class="card"><div class="label">Total TPV</div><div id="tpvTotal" class="value">69,90 €</div></div>
       <div class="card"><div class="label">Total cobrado</div><div id="paidTotal" class="value">0,00 €</div></div>
       <div class="card"><div class="label">Total pendiente cobrar</div><div id="pendingTotal" class="value" style="color:#ef4444">69,90 €</div></div>
     </section>
 
-    <!-- AVISO CIERRE -->
     <div id="closeBanner" style="display:none;background:#ecfdf5;border:1px solid #86efac;color:#166534;
       padding:12px;border-radius:12px;text-align:center;font-weight:700;font-size:17px;">
       ✅ Mesa lista para cerrar
     </div>
 
-    <!-- PAGOS -->
-    <section class="card">
+    <section id="paymentsCard" class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <h3 style="margin:0;color:#0F766E">Pagos</h3>
         <span id="pendingCount" class="badge card-badge">Pendientes: 0</span>
       </div>
-      <div id="paymentsList" class="list">
-        <!-- sin ejemplos; se llenará cuando Cliente confirme -->
-      </div>
+      <div id="paymentsList" class="list"></div>
     </section>
 
     <footer><p><a href="../">⬅ Volver al inicio</a></p></footer>
   </main>
 
   <script>
-    // Utils € ↔ número
-    const euroToNum = (s) =>
-      parseFloat(s.replace(/\./g,'').replace(',', '.').replace(/[^\d.]/g,'')) || 0;
+    const euroToNum = (s) => parseFloat(s.replace(/\./g,'').replace(',', '.').replace(/[^\d.]/g,'')) || 0;
     const numToEuro = (n) => n.toFixed(2).replace('.', ',') + ' €';
 
-    // Elementos
+    const paymentsCard  = document.getElementById('paymentsCard');
     const paymentsList  = document.getElementById('paymentsList');
     const pendingCount  = document.getElementById('pendingCount');
     const tpvEl         = document.getElementById('tpvTotal');
@@ -83,12 +82,12 @@
     const pendingEl     = document.getElementById('pendingTotal');
     const resetBtn      = document.getElementById('resetBtn');
     const banner        = document.getElementById('closeBanner');
+    const demoAdd       = document.getElementById('demoAdd');
 
-    // Estados
-    const initialTPV  = euroToNum(tpvEl.textContent);   // 69,90 €
+    const initialTPV  = euroToNum(tpvEl.textContent);
     let totalTPV      = initialTPV;
-    let totalPaid     = 0;                               // empieza en 0,00 €
-    let pending       = 0;                               // sin filas hasta que llegue cliente
+    let totalPaid     = 0;
+    let pending       = 0;
 
     function refreshTotals() {
       paidEl.textContent = numToEuro(totalPaid);
@@ -100,7 +99,6 @@
     }
     refreshTotals();
 
-    // Añadir una fila pendiente desde Cliente (NO toca €)
     function addPendingRow({code, amount, items, method, name}) {
       const badgeClass = method === 'Efectivo' ? 'cash' : 'cardm';
       const who = name ? ` de ${name}` : '';
@@ -118,9 +116,12 @@
       pending++;
       refreshTotals();
       attachButton(row.querySelector(".btn"));
+      // Destello + scroll
+      paymentsCard.classList.add('flash');
+      setTimeout(()=>paymentsCard.classList.remove('flash'), 600);
+      row.scrollIntoView({behavior:'smooth', block:'start'});
     }
 
-    // Marcar cobrado → sube Total cobrado, baja Pendiente
     function attachButton(btn) {
       btn.addEventListener("click", () => {
         const idLine = btn.parentElement.querySelector('.id').textContent;
@@ -145,7 +146,7 @@
       if (data.type === 'partial_confirmed') addPendingRow(data);
     };
 
-    // Reset demo → limpia lista y vuelve a 0 cobrado / TPV íntegro pendiente
+    // Reset
     resetBtn.addEventListener('click', () => {
       paymentsList.innerHTML = '';
       totalTPV  = initialTPV;
@@ -153,6 +154,21 @@
       pending   = 0;
       refreshTotals();
     });
+
+    // Atajo de demo (activar con ?demo=1)
+    if (location.search.includes('demo=1')) {
+      demoAdd.style.display = 'inline';
+      demoAdd.addEventListener('click', (ev)=>{
+        ev.preventDefault();
+        addPendingRow({
+          code: 'DEMO',
+          amount: '12,30 €',
+          items: '1× Caña · 1× Refresco · 1× Tarta de Queso',
+          method: Math.random()>.5?'Tarjeta':'Efectivo',
+          name: 'Demo'
+        });
+      });
+    }
   </script>
 </body>
 </html>
