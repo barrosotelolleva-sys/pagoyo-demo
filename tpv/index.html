@@ -109,7 +109,35 @@
     const tbody = document.getElementById('tbody');
     const totalCell = document.getElementById('totalCell');
     const mesaSel = document.getElementById('mesa');
+    // --- Sincronizar cambio de mesa con la sala ---
+mesaSel.addEventListener('change', ()=>{
+  // Actualiza el rótulo
+  mesaLabel.textContent = mesaSel.value;
+
+  // Emite un update "en blanco o con lo que haya"
+  bus.post({
+    type: 'tpv_ticket_update',
+    mesa: mesaSel.value,
+    items: items.map(i=>({ name:i.name, price:i.price, qty:i.qty })), // si no hay, será []
+    total: totalCell.textContent                                     // "0,00 €" si está vacío
+  });
+});
+
     const mesaLabel = document.getElementById('mesaLabel');
+    // --- Sincronizar cambio de mesa con la sala ---
+mesaSel.addEventListener('change', ()=>{
+  // Actualiza el rótulo
+  mesaLabel.textContent = mesaSel.value;
+
+  // Emite un update "en blanco o con lo que haya"
+  bus.post({
+    type: 'tpv_ticket_update',
+    mesa: mesaSel.value,
+    items: items.map(i=>({ name:i.name, price:i.price, qty:i.qty })), // si no hay, será []
+    total: totalCell.textContent                                     // "0,00 €" si está vacío
+  });
+});
+
     const items = []; // {name, price, qty}
 
     function render(){
