@@ -15,10 +15,11 @@
     .pill{background:#F4F6F8;border:1px solid #e5e7eb;border-radius:20px;padding:6px 10px;font-size:12px;color:#0F766E}
     .btn{background:var(--teal);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
     .opt{border:1px solid #e5e7eb;border-radius:10px;padding:8px 12px;cursor:pointer}
-    ul{list-style:none;padding:0;margin:0} li{padding:10px;border-bottom:1px solid #eee}
+    ul{list-style:none;padding:0;margin:0} li{padding:10px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;gap:10px}
     .controls{display:flex;align-items:center;gap:8px}
     .qty{min-width:24px;text-align:center;display:inline-block}
     .right{margin-left:auto}
+    input[type="text"]{border:1px solid #e5e7eb;border-radius:10px;padding:8px 10px}
     .flash{animation:flash .6s ease-out} @keyframes flash{from{box-shadow:0 0 0 rgba(15,118,110,0)}to{box-shadow:0 0 0 10px rgba(15,118,110,.12)}}
     .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111;color:#fff;padding:10px 14px;border-radius:10px}
   </style>
@@ -40,11 +41,12 @@
 
   <main>
     <section class="card">
-      <div id="mesaTotal" class="row"><strong>Total mesa:</strong> <span>—</span></div>
+      <div class="row"><strong>Total mesa:</strong> <span id="mesaTotal">—</span></div>
       <ul id="itemsList"></ul>
-      <div class="row">
+      <div class="row" style="flex-wrap:wrap;gap:12px">
         <div><span>Mi importe:</span> <strong id="myTotal">0,00 €</strong></div>
-        <div class="right">
+        <div class="right" style="display:flex;align-items:center;gap:8px">
+          <input id="customerName" type="text" placeholder="Tu nombre (opcional)" />
           <span class="opt" data-method="Efectivo">Efectivo</span>
           <span class="opt" data-method="Tarjeta">Tarjeta</span>
           <button id="confirmBtn" class="btn" disabled>Confirmar pago</button>
@@ -70,14 +72,6 @@
       return { post:(d)=>{ try{ localStorage.setItem(name, JSON.stringify(d)); }catch(_){ } }, close:()=>{} };
     }
   }
-  (() => {
-  const box = document.createElement('pre');
-  box.id = 'dbg';
-  box.style = 'position:fixed;right:8px;bottom:8px;max-width:60vw;max-height:35vh;overflow:auto;background:#111;color:#0f0;padding:8px;border-radius:6px;font-size:11px;opacity:.9;z-index:9999';
-  box.textContent = 'DBG Cliente listo...\n';
-  document.body.appendChild(box);
-  window._dbg = (m) => { box.textContent += m + '\n'; };
-})();  
   const bus = makeBus('pagoyo_demo');
 
   // ===== Utilidades y refs
@@ -85,10 +79,10 @@
   const euroToNum = (s)=> parseFloat((s||'0').toString().replace(/\./g,'').replace(',','.').replace(/[^\d.]/g,''))||0;
 
   const list = document.getElementById('itemsList');
-  const mesaTotalEl = document.querySelector('#mesaTotal span');
+  const mesaTotalEl = document.getElementById('mesaTotal');
   const myTotalEl = document.getElementById('myTotal');
   const confirmBtn = document.getElementById('confirmBtn');
-
+  const nameInput = document.getElementById('customerName');
   const pillMesa = document.getElementById('pillMesa');
   const pillEstado = document.getElementById('pillEstado');
 
@@ -96,66 +90,23 @@
   const items = []; // [{ el, name, price, total, selected }]
 
   function refreshUI(){
-    // Recalcular "Mi importe"
     let mt = 0;
     items.forEach(i=>{ mt += i.selected * i.price; });
     myTotalEl.textContent = fmt(mt);
     confirmBtn.disabled = mt <= 0;
   }
 
- function ensureLine(name, price){
- function updateLineMeta(obj){
-  const rem = Math.max(0, (obj.total||0) - (obj.selected||0));
-  obj.el.querySelector('.rem').textContent = rem;
-  obj.el.querySelector('.tot').textContent = obj.total || 0;
-  obj.el.querySelector('.qty').textContent = obj.selected || 0;
-  obj.el.querySelector('.lineTotal').textContent = fmt((obj.selected||0) * obj.price);
-}
-  
-  let li = [...document.querySelectorAll('#itemsList > li')].find(x=>x.dataset.name===name);
-  if (!li){
-    li = document.createElement('li');
-    li.dataset.name = name;
-    li.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <div><strong>${name}</strong>
-          <span class="pill" style="margin-left:6px">${price.toFixed(2).replace('.',',')} €</span>
-        </div>
-        <div class="meta" style="font-size:12px;color:#555">Quedan <strong class="rem">0</strong> de <strong class="tot">0</strong></div>
-      </div>
-      <div class="controls">
-        <button class="optQty" data-act="-">−</button>
-        <span class="qty">0</span>
-        <button class="optQty" data-act="+">+</button>
-        <div class="lineTotal right">0,00 €</div>
-      </div>`;
-    list.appendChild(li);
-    // total = unidades en TPV, selected = las que marca este cliente
-    items.push({ el: li, name, price, total: 0, selected: 0 });
-  }
-  return li;
-}
- 
- function applyTPVUpdate(payload){
-  try{
-    // 1) Vaciar lista
-    list.innerHTML = '';
-
-    // 2) Pintar cada línea que viene del TPV
-    (payload.items || []).forEach(it=>{
-      const name  = it.name;
-      const price = parseFloat(it.price);
-      const qty   = parseInt(it.qty || 0, 10);
-
-      const li = document.createElement('li');
+  function ensureLine(name, price){
+    let li = [...document.querySelectorAll('#itemsList > li')].find(x=>x.dataset.name===name);
+    if (!li){
+      li = document.createElement('li');
+      li.dataset.name = name;
       li.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:4px">
           <div><strong>${name}</strong>
-            <span class="pill" style="margin-left:6px">${price.toFixed(2).replace('.', ',')} €</span>
+            <span class="pill" style="margin-left:6px">${price.toFixed(2).replace('.',',')} €</span>
           </div>
-          <div style="font-size:12px;color:#555">
-            Quedan <strong class="rem">${qty}</strong> de <strong class="tot">${qty}</strong>
-          </div>
+          <div class="meta" style="font-size:12px;color:#555">Quedan <strong class="rem">0</strong> de <strong class="tot">0</strong></div>
         </div>
         <div class="controls">
           <button class="optQty" data-act="-">−</button>
@@ -164,34 +115,61 @@
           <div class="lineTotal right">0,00 €</div>
         </div>`;
       list.appendChild(li);
-    });
-
-    // 3) Total de mesa y estado
-    mesaTotalEl.textContent = payload.total || '—';
-    list.style.opacity = 1;
-    list.style.pointerEvents = 'auto';
-    pillEstado.textContent = 'sincronizado';
-
-    // 4) Recalcular “Mi importe”
-    refreshUI();
-  }catch(err){
-    console.error('applyTPVUpdate error:', err);
+      items.push({ el: li, name, price, total: 0, selected: 0 });
+    }
+    return li;
   }
-}
 
-  // Total de la mesa
-  mesaTotalEl.textContent = payload.total || '—';
+  function updateLineMeta(obj){
+    const rem = Math.max(0, (obj.total||0) - (obj.selected||0));
+    obj.el.querySelector('.rem').textContent = rem;
+    obj.el.querySelector('.tot').textContent = obj.total || 0;
+    obj.el.querySelector('.qty').textContent = obj.selected || 0;
+    obj.el.querySelector('.lineTotal').textContent = fmt((obj.selected||0) * obj.price);
+  }
 
-  // Habilita selección
-  list.style.opacity = 1;
-  list.style.pointerEvents = 'auto';
-  pillEstado.textContent = 'sincronizado';
+  // ===== Recibir ticket del TPV
+  makeBus('pagoyo_demo', (d)=>{
+    try{
+      // Filtro por mesa robusto (solo dígitos por si viene "Mesa 6")
+      const mesaSel = (document.getElementById('mesaSelect')?.value || '6').toString().replace(/\D/g,'');
+      const msgMesa = (d.mesa || '6').toString().replace(/\D/g,'');
+      if (msgMesa && mesaSel && msgMesa !== mesaSel) return;
 
-  refreshUI();
-}
+      if (d.type === 'tpv_ticket_update') applyTPVUpdate(d);
+      if (d.type === 'tpv_ticket_close'){
+        list.style.opacity = .6; list.style.pointerEvents = 'none';
+        pillEstado.textContent = 'ticket cerrado'; confirmBtn.disabled = true;
+        const t=document.createElement('div');t.className='toast';t.textContent='Ticket cerrado desde TPV';document.body.appendChild(t);
+        setTimeout(()=>{t.style.transition='opacity .25s, transform .25s';t.style.opacity=0;t.style.transform='translateY(-8px)';},1500);
+        setTimeout(()=>t.remove(),1800);
+      }
+    }catch(err){ console.error('Cliente onmessage', err); }
+  });
 
-  // Inicial: limpio
-  items.forEach(i=>{ i.total=0; i.selected=0; });
+  function applyTPVUpdate(payload){
+    try{
+      // Reinicia totales/selección y asegura líneas
+      items.forEach(i=>{ i.total = 0; i.selected = 0; updateLineMeta(i); });
+      (payload.items||[]).forEach(it=>{
+        const price = parseFloat(it.price);
+        const li = ensureLine(it.name, price);
+        const obj = items.find(x=>x.el===li);
+        obj.total = parseInt(it.qty||0,10);
+        obj.selected = 0;
+        updateLineMeta(obj);
+      });
+
+      mesaTotalEl.textContent = payload.total || '—';
+      list.style.opacity = 1; list.style.pointerEvents = 'auto';
+      pillEstado.textContent = 'sincronizado';
+      list.classList.add('flash'); setTimeout(()=>list.classList.remove('flash'),600);
+      refreshUI();
+    }catch(err){ console.error('applyTPVUpdate error:', err); }
+  }
+
+  // Inicial en blanco
+  items.forEach(i=>{ i.total = 0; i.selected = 0; updateLineMeta(i); });
   list.style.opacity = .6; list.style.pointerEvents = 'none';
   mesaTotalEl.textContent = '—';
   refreshUI();
@@ -201,31 +179,24 @@
     const m = document.getElementById('mesaSelect').value;
     pillMesa.textContent = m;
     pillEstado.textContent = 'esperando ticket…';
-    items.forEach(i=>{ i.total=0; i.selected=0; });
+    items.forEach(i=>{ i.total = 0; i.selected = 0; updateLineMeta(i); });
     list.style.opacity = .6; list.style.pointerEvents = 'none';
     mesaTotalEl.textContent = '—';
     refreshUI();
   });
 
-  // Click +/-
- list.addEventListener('click',(e)=>{
-  const act = e.target.dataset.act; if(!act) return;
-  const li = e.target.closest('li');
-  const obj = items.find(x=>x.el===li); if(!obj) return;
+  // + / -
+  list.addEventListener('click',(e)=>{
+    const act = e.target.dataset.act; if(!act) return;
+    const li = e.target.closest('li');
+    const obj = items.find(x=>x.el===li); if(!obj) return;
+    if (act==='+'){ if (obj.selected < obj.total) obj.selected++; }
+    if (act==='-'){ obj.selected = Math.max(0, obj.selected - 1); }
+    updateLineMeta(obj);
+    refreshUI();
+  });
 
-  if (act==='+'){
-    // no puede seleccionar más de lo que hay en TPV
-    if (obj.selected < obj.total) obj.selected++;
-  }
-  if (act==='-'){
-    obj.selected = Math.max(0, obj.selected - 1);
-  }
-  updateLineMeta(obj);
-  refreshUI();
-});
-
-
-  // Confirmar pago
+  // Confirmar pago (con nombre + mesa)
   document.querySelectorAll('.opt').forEach(o=>{
     o.addEventListener('click', ()=>{
       const method = o.dataset.method || 'Efectivo';
@@ -233,6 +204,10 @@
       const total = itemsSel.reduce((s,i)=>s + i.qty*i.price, 0);
       const mesaSelEl = document.getElementById('mesaSelect');
       const mesa = mesaSelEl ? mesaSelEl.value : "6";
+      const customerName = (nameInput.value || '').trim();
+      // usamos code para mostrar el nombre en Camarero
+      const code = (customerName ? customerName : 'Parcial') + ' • ' + Math.random().toString(36).slice(2,6).toUpperCase();
+
       bus.post({
         type:'partial_confirmed',
         mesa,
@@ -240,44 +215,14 @@
         method,
         amount: fmt(total),
         items: itemsSel,
-        code: "M"+mesa+"-"+Math.random().toString(36).slice(2,6).toUpperCase()
+        code
       });
-      // reset selección
-      items.forEach(i=>{ i.selected=0; i.el.querySelector('.qty').textContent='0'; i.el.querySelector('.lineTotal').textContent='0,00 €'; });
+
+      // reset selección (mantenemos nombre)
+      items.forEach(i=>{ i.selected=0; updateLineMeta(i); });
       refreshUI();
     });
   });
-
-  // Escuchar TPV (robusto)
- // Escuchar TPV (hotfix sin filtro para verificar recepción)
-makeBus('pagoyo_demo', (d)=>{
-  try {
-    // Aviso visible de que llega el mensaje
-    const box = document.getElementById('dbg') || (()=>{ 
-      const b=document.createElement('pre');
-      b.id='dbg'; b.style='position:fixed;right:8px;bottom:8px;max-width:60vw;max-height:35vh;overflow:auto;background:#111;color:#0f0;padding:8px;border-radius:6px;font-size:11px;opacity:.9;z-index:9999';
-      b.textContent='DBG Cliente listo...\n'; document.body.appendChild(b); return b;
-    })();
-    box.textContent += 'LLEGA: ' + JSON.stringify(d) + '\n';
-
-    if (!d || !d.type) return;
-
-    if (d.type === 'tpv_ticket_update') {
-      // Forzamos la aplicación del ticket sin filtrar por mesa
-      applyTPVUpdate(d);
-    }
-
-    if (d.type === 'tpv_ticket_close') {
-      list.style.opacity = .6;
-      list.style.pointerEvents = 'none';
-      pillEstado.textContent = 'ticket cerrado';
-      confirmBtn.disabled = true;
-    }
-  } catch(err){
-    console.error('Cliente onmessage error:', err);
-  }
-});
-
   </script>
 </body>
 </html>
