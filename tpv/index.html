@@ -133,20 +133,32 @@
       render();
     });
 
-    // Canal de demo
-    const ch = new BroadcastChannel('pagoyo_demo');
-
-    // Enviar actualización (con mesa SIEMPRE)
-    document.getElementById('btnUpdate').addEventListener('click', ()=>{
-      const mesa = mesaSel ? mesaSel.value : "6";
-      ch.postMessage({
-        type: 'tpv_ticket_update',
-        mesa,
-        items: items.map(i=>({name:i.name, price:i.price, qty:i.qty})),
-        total: totalCell.textContent
+   // ==== Canal robusto de demo (BroadcastChannel con fallback a localStorage) ====
+function makeBus(name, onMessage){
+  const HAS_BC = 'BroadcastChannel' in window;
+  if (HAS_BC) {
+    const bc = new BroadcastChannel(name);
+    if (onMessage) bc.onmessage = (e)=>onMessage(e.data || {});
+    return {
+      post: (data)=>bc.postMessage(data),
+      close: ()=>bc.close()
+    };
+  } else {
+    // Fallback: usa eventos de storage entre pestañas
+    if (onMessage) {
+      window.addEventListener('storage', (e)=>{
+        if (e.key === name && e.newValue) {
+          try { onMessage(JSON.parse(e.newValue)); } catch(_){}
+        }
       });
-      alert('Ticket enviado a sala.');
-    });
+    }
+    return {
+      post: (data)=>{ try { localStorage.setItem(name, JSON.stringify(data)); } catch(_){} },
+      close: ()=>{}
+    };
+  }
+}
+
 
     // Cerrar ticket (con mesa)
     document.getElementById('btnClose').addEventListener('click', ()=>{
