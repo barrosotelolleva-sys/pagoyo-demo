@@ -219,22 +219,35 @@
   });
 
   // Escuchar TPV (robusto)
-  makeBus('pagoyo_demo', (d)=>{
-     _dbg('LLEGA: ' + JSON.stringify(d));
-    
-    const mesaSelEl = document.getElementById('mesaSelect');
-    const mesaSel = mesaSelEl ? mesaSelEl.value : "6";
-    if (d.mesa && d.mesa !== mesaSel) return;
-     _dbg('LLEGA: ' + JSON.stringify(d));
+ // Escuchar TPV (hotfix sin filtro para verificar recepción)
+makeBus('pagoyo_demo', (d)=>{
+  try {
+    // Aviso visible de que llega el mensaje
+    const box = document.getElementById('dbg') || (()=>{ 
+      const b=document.createElement('pre');
+      b.id='dbg'; b.style='position:fixed;right:8px;bottom:8px;max-width:60vw;max-height:35vh;overflow:auto;background:#111;color:#0f0;padding:8px;border-radius:6px;font-size:11px;opacity:.9;z-index:9999';
+      b.textContent='DBG Cliente listo...\n'; document.body.appendChild(b); return b;
+    })();
+    box.textContent += 'LLEGA: ' + JSON.stringify(d) + '\n';
 
-    if (d.type==='tpv_ticket_update') applyTPVUpdate(d);
-    if (d.type==='tpv_ticket_close'){
-      list.style.opacity = .6; list.style.pointerEvents = 'none'; pillEstado.textContent = 'ticket cerrado'; confirmBtn.disabled = true;
-      const t=document.createElement('div');t.className='toast';t.textContent='Ticket cerrado desde TPV';document.body.appendChild(t);
-      setTimeout(()=>{t.style.transition='opacity .25s, transform .25s';t.style.opacity=0;t.style.transform='translateY(-8px)';},1500);
-      setTimeout(()=>t.remove(),1800);
+    if (!d || !d.type) return;
+
+    if (d.type === 'tpv_ticket_update') {
+      // Forzamos la aplicación del ticket sin filtrar por mesa
+      applyTPVUpdate(d);
     }
-  });
+
+    if (d.type === 'tpv_ticket_close') {
+      list.style.opacity = .6;
+      list.style.pointerEvents = 'none';
+      pillEstado.textContent = 'ticket cerrado';
+      confirmBtn.disabled = true;
+    }
+  } catch(err){
+    console.error('Cliente onmessage error:', err);
+  }
+});
+
   </script>
 </body>
 </html>
