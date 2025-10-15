@@ -3,216 +3,155 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PagoYo — Panel Camarero</title>
+  <title>PagoYo — Camarero (Demo)</title>
   <style>
-    :root{--teal:#0F766E;--orange:#E67E22;--bg:#F4F6F8;--ok:#16a34a;--warn:#ef4444}
-    *{box-sizing:border-box} body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:#111}
+    :root{--teal:#0F766E}
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,Arial,sans-serif;color:#111;background:#fff}
     header{background:var(--teal);color:#fff;padding:12px}
-    header .bar{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
-    header .btn{background:#111;color:#fff;border:none;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:700}
-    main{max-width:900px;margin:auto;padding:18px}
-    .grid{display:grid;gap:12px}
-    .totals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(15,118,110,.1)}
-    .label{font-size:13px;color:#555}
-    .value{font-size:22px;font-weight:800;color:#0F766E}
-    .list{display:grid;gap:10px;margin-top:6px}
-    .row{display:flex;gap:12px;align-items:center;justify-content:space-between;border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff}
-    .left{display:flex;flex-direction:column;gap:4px}
-    .id{font-weight:700}
-    .items{font-size:13px;color:#555}
-    .badge{border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700}
-    .card-badge{background:#eefcf9;color:#0F766E;border:1px solid rgba(15,118,110,.25)}
-    .cash{background:#fff7ed;color:#b45309;border:1px solid #fdba74}
-    .cardm{background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd}
-    .paid{background:#ecfdf5;color:#16a34a;border:1px solid #86efac}
-    .btn{border:none;background:var(--teal);color:#fff;font-weight:700;padding:10px 12px;border-radius:10px;cursor:pointer}
-    .btn:disabled{background:#ddd;color:#666;cursor:default}
-    .flash{animation:flash .6s ease-out}
-    @keyframes flash{from{box-shadow:0 0 0 rgba(15,118,110,0)}to{box-shadow:0 0 0 8px rgba(15,118,110,.12)}}
-    footer{text-align:center;margin-top:14px}
-    a{color:#0F766E;text-decoration:none;font-weight:600}
-    @media (max-width:720px){.totals{grid-template-columns:1fr}}
-    .tiny{font-size:12px;opacity:.7}
+    header .bar{max-width:920px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+    main{max-width:920px;margin:0 auto;padding:16px;display:grid;gap:12px}
+    .cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .value{font-size:22px;font-weight:800}
+    .btn{background:var(--teal);color:#fff;border:none;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
+    .badge{background:#F4F6F8;border:1px solid #e5e7eb;border-radius:20px;padding:4px 8px;font-size:12px;color:#0F766E}
+    table{width:100%;border-collapse:collapse;font-size:14px} th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+    .flash{animation:flash .6s ease-out}@keyframes flash{from{box-shadow:0 0 0 rgba(15,118,110,0)}to{box-shadow:0 0 0 10px rgba(15,118,110,.12)}}
   </style>
 </head>
 <body>
-  <header>
+  <header><div class="bar"><strong>PagoYo — Panel Camarero</strong><a href="../" style="color:#fff;text-decoration:none">⬅ Inicio</a></div></header>
+
   <div style="text-align:center;background:#F4F6F8;padding:10px 0;">
-  <label for="mesaSelect" style="font-weight:700;color:#0F766E;">Mesa:</label>
-  <select id="mesaSelect" style="padding:6px 10px;border-radius:10px;border:1px solid #ccc;">
-    <option value="6" selected>Mesa 6</option>
-    <option value="5">Mesa 5</option>
-    <option value="4">Mesa 4</option>
-  </select>
-</div>
-  
-    <div class="bar">
-      <span>Mesa 6 — Panel Camarero</span>
-      <div>
-        <a id="demoAdd" class="tiny" href="#" style="display:none;margin-right:8px;color:#fff;text-decoration:underline">➕ parcial demo</a>
-        <button id="resetBtn" class="btn" style="background:#111">Reset demo</button>
-      </div>
-    </div>
-  </header>
+    <label for="mesaSelect" style="font-weight:700;color:#0F766E;">Mesa:</label>
+    <select id="mesaSelect" style="padding:6px 10px;border-radius:10px;border:1px solid #ccc;">
+      <option value="6" selected>Mesa 6</option>
+      <option value="5">Mesa 5</option>
+      <option value="4">Mesa 4</option>
+    </select>
+  </div>
+  <div id="syncPill" style="text-align:center;font-size:13px;margin:6px 0;color:#0F766E">
+    Mesa <strong id="pillMesa">6</strong> · <span id="pillEstado">esperando ticket…</span>
+  </div>
 
-  <main class="grid">
-    <section class="totals">
-      <div class="card"><div class="label">Total TPV</div><div id="tpvTotal" class="value">69,90 €</div></div>
-      <div class="card"><div class="label">Total cobrado</div><div id="paidTotal" class="value">0,00 €</div></div>
-      <div class="card"><div class="label">Total pendiente cobrar</div><div id="pendingTotal" class="value" style="color:#ef4444">69,90 €</div></div>
+  <main>
+    <section class="cards">
+      <div class="card"><div>Total TPV</div><div id="tpvTotal" class="value">0,00 €</div></div>
+      <div class="card"><div>Total cobrado</div><div id="paidTotal" class="value">0,00 €</div></div>
+      <div class="card"><div>Total pendiente cobrar</div><div id="pendingTotal" class="value" style="color:#ef4444">0,00 €</div></div>
     </section>
 
-    <div id="closeBanner" style="display:none;background:#ecfdf5;border:1px solid #86efac;color:#166534;
-      padding:12px;border-radius:12px;text-align:center;font-weight:700;font-size:17px;">
-      ✅ Mesa lista para cerrar
-    </div>
-
-    <section id="paymentsCard" class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <section class="card" id="paymentsCard">
+      <div style="display:flex;align-items:center;justify-content:space-between">
         <h3 style="margin:0;color:#0F766E">Pagos</h3>
-        <span id="pendingCount" class="badge card-badge">Pendientes: 0</span>
+        <span id="banner" class="badge" style="display:none">Ticket cerrado</span>
       </div>
-      <div id="paymentsList" class="list"></div>
+      <table>
+        <thead><tr><th>Parcial</th><th>Detalle</th><th>Método</th><th>Importe</th><th></th></tr></thead>
+        <tbody id="paymentsList"></tbody>
+      </table>
     </section>
-
-    <footer><p><a href="../">⬅ Volver al inicio</a></p></footer>
+    <div><button id="resetBtn" class="btn">Reset demo</button></div>
   </main>
 
   <script>
-    const euroToNum = (s) => parseFloat(s.replace(/\./g,'').replace(',', '.').replace(/[^\d.]/g,'')) || 0;
-    const numToEuro = (n) => n.toFixed(2).replace('.', ',') + ' €';
-
-    const paymentsCard  = document.getElementById('paymentsCard');
-    const paymentsList  = document.getElementById('paymentsList');
-    const pendingCount  = document.getElementById('pendingCount');
-    const tpvEl         = document.getElementById('tpvTotal');
-    const paidEl        = document.getElementById('paidTotal');
-    const pendingEl     = document.getElementById('pendingTotal');
-    const resetBtn      = document.getElementById('resetBtn');
-    const banner        = document.getElementById('closeBanner');
-    const demoAdd       = document.getElementById('demoAdd');
-
-    const initialTPV  = euroToNum(tpvEl.textContent);
-    let totalTPV      = initialTPV;
-    let totalPaid     = 0;
-    let pending       = 0;
-
-    function refreshTotals() {
-      paidEl.textContent = numToEuro(totalPaid);
-      const totalPending = Math.max(0, totalTPV - totalPaid);
-      pendingEl.textContent  = numToEuro(totalPending);
-      pendingEl.style.color  = totalPending > 0 ? '#ef4444' : '#16a34a';
-      banner.style.display   = totalPending === 0 ? 'block' : 'none';
-      pendingCount.textContent = 'Pendientes: ' + pending;
-    }
-    refreshTotals();
-
-    function addPendingRow({code, amount, items, method, name}) {
-      const badgeClass = method === 'Efectivo' ? 'cash' : 'cardm';
-      const who = name ? ` de ${name}` : '';
-      const row = document.createElement('div');
-      row.className = 'row';
-      row.innerHTML = `
-        <div class="left">
-          <span class="id">Parcial${who} #${code} • ${amount}</span>
-          <span class="items">${items || ''}</span>
-        </div>
-        <span class="badge ${badgeClass}">${method}</span>
-        <button class="btn">Marcar cobrado</button>
-      `;
-      paymentsList.prepend(row);
-      pending++;
-      refreshTotals();
-      attachButton(row.querySelector(".btn"));
-      // Destello + scroll
-      paymentsCard.classList.add('flash');
-      setTimeout(()=>paymentsCard.classList.remove('flash'), 600);
-      row.scrollIntoView({behavior:'smooth', block:'start'});
-    }
-
-    function attachButton(btn) {
-      btn.addEventListener("click", () => {
-        const idLine = btn.parentElement.querySelector('.id').textContent;
-        const m = idLine.match(/•\s*([\d.,]+)\s*€/);
-        const amountNum = m ? euroToNum(m[1] + ' €') : 0;
-
-        btn.disabled = true;
-        btn.textContent = "Cobrado";
-        btn.previousElementSibling.className = "badge paid";
-        btn.previousElementSibling.textContent = "Cobrado";
-
-        pending = Math.max(0, pending - 1);
-        totalPaid = Math.min(totalTPV, totalPaid + amountNum);
-        refreshTotals();
-      });
-    }
-
-   // Canal Cliente/TPV → Camarero
-const ch = new BroadcastChannel('pagoyo_demo');
-ch.onmessage = (e) => {
-  const data = e.data || {};
-  const mesaSel = document.getElementById('mesaSelect').value;
-  if(data.mesa && data.mesa !== mesaSel) return;
-
-  if (data.type === 'partial_confirmed') addPendingRow(data);
-  if (data.type === 'tpv_ticket_update') {
-    tpvEl.textContent = data.total || numToEuro(0);
-    totalTPV  = euroToNum(tpvEl.textContent);
-    totalPaid = 0;
-    pending   = 0;
-    paymentsList.innerHTML = '';
-    refreshTotals();
+  // ===== Bus robusto
+  function makeBus(name, onMessage){
+    const HAS_BC='BroadcastChannel'in window;
+    if(HAS_BC){ const bc=new BroadcastChannel(name); if(onMessage) bc.onmessage=(e)=>onMessage(e.data||{}); return {post:(d)=>bc.postMessage(d),close:()=>bc.close()}; }
+    else { if(onMessage){ window.addEventListener('storage',(e)=>{ if(e.key===name&&e.newValue){ try{ onMessage(JSON.parse(e.newValue)); }catch(_){ } } }); } return {post:(d)=>{try{localStorage.setItem(name,JSON.stringify(d));}catch(_){ }},close:()=>{}}; }
   }
-  if (data.type === 'tpv_ticket_close') {
-    if (banner) banner.style.display = 'block';
+  const bus = makeBus('pagoyo_demo');
+
+  // ===== Utiles
+  const numToEuro = n => (n||0).toFixed(2).replace('.',',')+' €';
+  const euroToNum = s => parseFloat((s||'0').toString().replace(/\./g,'').replace(',','.').replace(/[^\d.]/g,''))||0;
+
+  // Totales
+  const tpvEl=document.getElementById('tpvTotal');
+  const paidEl=document.getElementById('paidTotal');
+  const pendingEl=document.getElementById('pendingTotal');
+  let totalTPV = euroToNum(tpvEl.textContent); // 0
+  let totalPaid=0;
+  let pending =0;
+
+  function refreshTotals(){
+    paidEl.textContent = numToEuro(totalPaid);
+    pending = Math.max(0, totalTPV - totalPaid);
+    pendingEl.textContent = numToEuro(pending);
   }
-};
-
-
-  if (data.type === 'tpv_ticket_update') {
-    // Actualiza Total TPV desde el TPV simulado y resetea cobros/pendientes
-    tpvEl.textContent = data.total || numToEuro(0);
-    totalTPV  = euroToNum(tpvEl.textContent);
-    totalPaid = 0;
-    pending   = 0;
-    paymentsList.innerHTML = '';
-    refreshTotals();
-  }
-
-  if (data.type === 'tpv_ticket_close') {
-    // Opcional: muestra banner de cierre
-    if (banner) banner.style.display = 'block';
-  }
-};
-
-
-    // Reset
-   resetBtn.addEventListener('click', () => {
-  // Usa el TPV que esté ahora en pantalla como base
-  totalTPV  = euroToNum(tpvEl.textContent);
-  totalPaid = 0;
-  paymentsList.innerHTML = '';
-  pending   = 0;
   refreshTotals();
-});
 
+  // Pagos
+  const paymentsList=document.getElementById('paymentsList');
+  const paymentsCard=document.getElementById('paymentsCard');
+  const banner=document.getElementById('banner');
 
-    // Atajo de demo (activar con ?demo=1)
-    if (location.search.includes('demo=1')) {
-      demoAdd.style.display = 'inline';
-      demoAdd.addEventListener('click', (ev)=>{
-        ev.preventDefault();
-        addPendingRow({
-          code: 'DEMO',
-          amount: '12,30 €',
-          items: '1× Caña · 1× Refresco · 1× Tarta de Queso',
-          method: Math.random()>.5?'Tarjeta':'Efectivo',
-          name: 'Demo'
-        });
-      });
+  function addPendingRow(data){
+    const tr=document.createElement('tr');
+    const detail=(data.items||[]).map(i=>`${i.qty}× ${i.name}`).join(' · ');
+    tr.innerHTML=`
+      <td>${data.code||'Parcial'}</td>
+      <td>${detail||'-'}</td>
+      <td>${data.method||'-'}</td>
+      <td>${data.amount||'0,00 €'}</td>
+      <td><button class="btn mark">Marcar cobrado</button></td>`;
+    paymentsList.appendChild(tr);
+    paymentsCard.classList.add('flash'); setTimeout(()=>paymentsCard.classList.remove('flash'),600);
+
+    tr.querySelector('.mark').addEventListener('click', ()=>{
+      const amt = euroToNum(data.amount||'0');
+      totalPaid += amt;
+      refreshTotals();
+      tr.querySelector('.mark').disabled = true;
+      tr.querySelector('.mark').textContent = 'Cobrado';
+      tr.querySelector('.mark').style.opacity='.6';
+    });
+  }
+
+  // Selector de mesa
+  const pillMesa=document.getElementById('pillMesa');
+  const pillEstado=document.getElementById('pillEstado');
+  document.getElementById('mesaSelect').addEventListener('change', ()=>{
+    const m=document.getElementById('mesaSelect').value;
+    pillMesa.textContent=m; pillEstado.textContent='esperando ticket…';
+    paymentsList.innerHTML='';
+    totalTPV=0; totalPaid=0; pending=0;
+    tpvEl.textContent=numToEuro(0); paidEl.textContent=numToEuro(0); pendingEl.textContent=numToEuro(0);
+    if (banner) banner.style.display='none';
+  });
+
+  // Escuchar TPV + Cliente
+  makeBus('pagoyo_demo', (data)=>{
+    const msel=document.getElementById('mesaSelect').value;
+    if (data.mesa && data.mesa !== msel) return;
+
+    if (data.type==='partial_confirmed') addPendingRow(data);
+
+    if (data.type==='tpv_ticket_update'){
+      tpvEl.textContent = data.total || numToEuro(0);
+      totalTPV = euroToNum(tpvEl.textContent);
+      totalPaid = 0;
+      paymentsList.innerHTML='';
+      pillEstado.textContent='sincronizado';
+      paymentsCard.classList.add('flash'); setTimeout(()=>paymentsCard.classList.remove('flash'),600);
+      if (banner) banner.style.display='none';
+      refreshTotals();
     }
+
+    if (data.type==='tpv_ticket_close'){
+      if (banner) banner.style.display='block';
+      pillEstado.textContent='ticket cerrado';
+    }
+  });
+
+  // Reset demo
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    paymentsList.innerHTML='';
+    totalTPV=0; totalPaid=0; pending=0;
+    tpvEl.textContent=numToEuro(0); paidEl.textContent=numToEuro(0); pendingEl.textContent=numToEuro(0);
+    if (banner) banner.style.display='none';
+  });
   </script>
 </body>
 </html>
-
