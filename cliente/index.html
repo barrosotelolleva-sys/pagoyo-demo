@@ -275,6 +275,75 @@
 
     // Canal a Camarero
     const ch = new BroadcastChannel('pagoyo_demo');
+// ====== TPV ⟷ Cliente (demo sin servidor) ======
+function euroToNum(s){ return parseFloat(s.replace(/\./g,'').replace(',','.').replace(/[^\d.]/g,''))||0; }
+
+// Asegura que existe una línea para un item dado (si no, la crea)
+function ensureLine(name, price){
+  let li = [...document.querySelectorAll('#itemsList > li')].find(x=>x.dataset.name===name);
+  if(!li){
+    li = document.createElement('li');
+    li.className = 'row';
+    li.dataset.name = name;
+    li.dataset.price = price.toFixed(2);
+    li.dataset.total = 0;
+    li.innerHTML = `
+      <div>
+        <div class="name">${name} <span class="pill">${price.toFixed(2).replace('.',',')} €</span></div>
+        <div class="metaLine"><span class="leftLine">Quedan <strong>0</strong> de 0</span></div>
+      </div>
+      <div class="controls">
+        <button class="btnQty" data-act="-">−</button>
+        <span class="qty">0</span>
+        <button class="btnQty" data-act="+">+</button>
+        <div class="lineTotal">0,00 €</div>
+      </div>`;
+    document.getElementById('itemsList').appendChild(li);
+    items.push({ el: li, name, price, total: 0, selected: 0 });
+  }
+  return li;
+}
+
+// Aplica un update del TPV (items y total)
+function applyTPVUpdate(payload){
+  // Reiniciar cantidades (lo que queda por pagar) y selección del cliente
+  items.forEach(i=>{ i.total = 0; i.selected = 0; });
+  (payload.items||[]).forEach(it=>{
+    const li = ensureLine(it.name, parseFloat(it.price));
+    const obj = items.find(x=>x.el===li);
+    obj.total = parseInt(it.qty||0,10);
+    obj.selected = 0;
+  });
+
+  // Total de mesa que viene del TPV
+  mesaTotalEl.textContent = "Total mesa: " + (payload.total || "0,00 €");
+
+  // Refrescar la UI y re-habilitar selección
+  list.style.opacity = 1;
+  list.style.pointerEvents = "auto";
+  confirmBtn.disabled = miImporte() <= 0;
+  refreshUI();
+}
+
+// Canal TPV → Cliente
+const chTPV = new BroadcastChannel('pagoyo_demo');
+chTPV.onmessage = (e)=>{
+  const d = e.data || {};
+  if(d.type === 'tpv_ticket_update') applyTPVUpdate(d);
+  if(d.type === 'tpv_ticket_close'){
+    // Bloquear selección cuando el TPV cierra ticket
+    list.style.opacity = .6;
+    list.style.pointerEvents = "none";
+    confirmBtn.disabled = true;
+    // Aviso corto (si tienes la clase .toast ya definida)
+    try{
+      const t=document.createElement('div');t.className='toast';t.textContent='Ticket cerrado desde TPV';
+      document.body.appendChild(t);
+      setTimeout(()=>{t.style.transition='opacity .25s, transform .25s';t.style.opacity=0;t.style.transform='translateY(-8px)';},1500);
+      setTimeout(()=>t.remove(),1800);
+    }catch(_){}
+  }
+};
 
     // Toast
     function toast(msg){
