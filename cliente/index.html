@@ -371,20 +371,24 @@ chTPV.onmessage = (e)=>{
 
     // Elegir método y enviar
     $$(".opt").forEach(opt=>{
-      opt.addEventListener("click", ()=>{
-        const method = opt.dataset.method;
-        const name = ($("#custName").value || "Cliente").trim();
-        const itemsSel = items.filter(i=> i.selected>0).map(i=> `${i.selected}× ${i.name}`).join(" · ");
-        const total = miImporte();
+   // Cuando el cliente elige método de pago
+opts.forEach(opt => opt.addEventListener('click', e => {
+  const method = e.target.textContent.trim();
+  const mesa = document.getElementById('mesaSelect')?.value || "6";  // <- NUEVO
+  const code = "M" + mesa + "-" + Math.random().toString(36).slice(2,6).toUpperCase();
+  const amount = fmt(total).replace(/\s/g,'');
 
-        methodTxt.textContent = method;
-        refCode.textContent = name;
-        doneBox.style.display = "block";
-        confirmBtn.textContent = "Parte confirmada";
-        confirmBtn.disabled = true;
-        overlay.classList.remove('show');
-        overlay.setAttribute("aria-hidden","true");
-
+  ch.postMessage({
+    type: 'partial_confirmed',
+    mesa,                      // <- NUEVO: mesa seleccionada
+    name,
+    method,
+    amount,
+    items: itemsSel,
+    code
+  });
+}));
+   
         // Enviar
         ch.postMessage({
           type: 'partial_confirmed',
