@@ -128,24 +128,29 @@
   return li;
 }
  
-  function applyTPVUpdate(payload){
-    // Reset
-    items.forEach(i=>{ i.total = 0; i.selected = 0; i.el.querySelector('.qty').textContent = '0'; i.el.querySelector('.lineTotal').textContent='0,00 €'; });
-    // Cargar desde TPV
-    (payload.items||[]).forEach(it=>{
-      const li = ensureLine(it.name, parseFloat(it.price));
-      const obj = items.find(x=>x.el===li);
-      obj.total = parseInt(it.qty||0,10);
-      obj.selected = 0;
-      li.querySelector('.qty').textContent = '0';
-      li.querySelector('.lineTotal').textContent = '0,00 €';
-    });
-    mesaTotalEl.textContent = payload.total || '—';
-    list.style.opacity = 1; list.style.pointerEvents = 'auto';
-    pillEstado.textContent = 'sincronizado';
-    list.classList.add('flash'); setTimeout(()=>list.classList.remove('flash'),600);
-    refreshUI();
-  }
+ function applyTPVUpdate(payload){
+  // Reinicia totales y selección
+  items.forEach(i=>{ i.total = 0; i.selected = 0; updateLineMeta(i); });
+
+  // Carga del TPV
+  (payload.items||[]).forEach(it=>{
+    const li = ensureLine(it.name, parseFloat(it.price));
+    const obj = items.find(x=>x.el===li);
+    obj.total = parseInt(it.qty||0,10);  // Y = unidades en TPV
+    obj.selected = 0;                    // X se calculará según seleccione el cliente
+    updateLineMeta(obj);
+  });
+
+  // Total de la mesa
+  mesaTotalEl.textContent = payload.total || '—';
+
+  // Habilita selección
+  list.style.opacity = 1;
+  list.style.pointerEvents = 'auto';
+  pillEstado.textContent = 'sincronizado';
+
+  refreshUI();
+}
 
   // Inicial: limpio
   items.forEach(i=>{ i.total=0; i.selected=0; });
