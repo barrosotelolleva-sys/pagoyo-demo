@@ -95,25 +95,31 @@
     confirmBtn.disabled = mt <= 0;
   }
 
-  function ensureLine(name, price){
-    let li = [...document.querySelectorAll('#itemsList > li')].find(x=>x.dataset.name===name);
-    if (!li){
-      li = document.createElement('li');
-      li.dataset.name = name;
-      li.innerHTML = `
-        <div><strong>${name}</strong> <span class="pill" style="margin-left:6px">${price.toFixed(2).replace('.',',')} €</span></div>
-        <div class="controls">
-          <button class="optQty" data-act="-">−</button>
-          <span class="qty">0</span>
-          <button class="optQty" data-act="+">+</button>
-          <div class="lineTotal right">0,00 €</div>
-        </div>`;
-      list.appendChild(li);
-      items.push({ el: li, name, price, total: 0, selected: 0 });
-    }
-    return li;
+ function ensureLine(name, price){
+  let li = [...document.querySelectorAll('#itemsList > li')].find(x=>x.dataset.name===name);
+  if (!li){
+    li = document.createElement('li');
+    li.dataset.name = name;
+    li.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div><strong>${name}</strong>
+          <span class="pill" style="margin-left:6px">${price.toFixed(2).replace('.',',')} €</span>
+        </div>
+        <div class="meta" style="font-size:12px;color:#555">Quedan <strong class="rem">0</strong> de <strong class="tot">0</strong></div>
+      </div>
+      <div class="controls">
+        <button class="optQty" data-act="-">−</button>
+        <span class="qty">0</span>
+        <button class="optQty" data-act="+">+</button>
+        <div class="lineTotal right">0,00 €</div>
+      </div>`;
+    list.appendChild(li);
+    // total = unidades en TPV, selected = las que marca este cliente
+    items.push({ el: li, name, price, total: 0, selected: 0 });
   }
-
+  return li;
+}
+ 
   function applyTPVUpdate(payload){
     // Reset
     items.forEach(i=>{ i.total = 0; i.selected = 0; i.el.querySelector('.qty').textContent = '0'; i.el.querySelector('.lineTotal').textContent='0,00 €'; });
