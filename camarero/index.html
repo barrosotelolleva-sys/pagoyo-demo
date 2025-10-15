@@ -139,21 +139,42 @@
       });
     }
 
-    // Canal Cliente → Camarero
-    const ch = new BroadcastChannel('pagoyo_demo');
-    ch.onmessage = (e) => {
-      const data = e.data || {};
-      if (data.type === 'partial_confirmed') addPendingRow(data);
-    };
+   // Canal Cliente/TPV → Camarero
+const ch = new BroadcastChannel('pagoyo_demo');
+ch.onmessage = (e) => {
+  const data = e.data || {};
+
+  if (data.type === 'partial_confirmed') {
+    addPendingRow(data);
+  }
+
+  if (data.type === 'tpv_ticket_update') {
+    // Actualiza Total TPV desde el TPV simulado y resetea cobros/pendientes
+    tpvEl.textContent = data.total || numToEuro(0);
+    totalTPV  = euroToNum(tpvEl.textContent);
+    totalPaid = 0;
+    pending   = 0;
+    paymentsList.innerHTML = '';
+    refreshTotals();
+  }
+
+  if (data.type === 'tpv_ticket_close') {
+    // Opcional: muestra banner de cierre
+    if (banner) banner.style.display = 'block';
+  }
+};
+
 
     // Reset
-    resetBtn.addEventListener('click', () => {
-      paymentsList.innerHTML = '';
-      totalTPV  = initialTPV;
-      totalPaid = 0;
-      pending   = 0;
-      refreshTotals();
-    });
+   resetBtn.addEventListener('click', () => {
+  // Usa el TPV que esté ahora en pantalla como base
+  totalTPV  = euroToNum(tpvEl.textContent);
+  totalPaid = 0;
+  paymentsList.innerHTML = '';
+  pending   = 0;
+  refreshTotals();
+});
+
 
     // Atajo de demo (activar con ?demo=1)
     if (location.search.includes('demo=1')) {
