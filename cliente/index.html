@@ -96,6 +96,14 @@
   }
 
  function ensureLine(name, price){
+ function updateLineMeta(obj){
+  const rem = Math.max(0, (obj.total||0) - (obj.selected||0));
+  obj.el.querySelector('.rem').textContent = rem;
+  obj.el.querySelector('.tot').textContent = obj.total || 0;
+  obj.el.querySelector('.qty').textContent = obj.selected || 0;
+  obj.el.querySelector('.lineTotal').textContent = fmt((obj.selected||0) * obj.price);
+}
+  
   let li = [...document.querySelectorAll('#itemsList > li')].find(x=>x.dataset.name===name);
   if (!li){
     li = document.createElement('li');
