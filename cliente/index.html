@@ -337,21 +337,27 @@ function applyTPVUpdate(payload){
 const chTPV = new BroadcastChannel('pagoyo_demo');
 chTPV.onmessage = (e)=>{
   const d = e.data || {};
+  const mesaSel = document.getElementById('mesaSelect').value;
+  // Solo procesar si coincide la mesa
+  if(d.mesa && d.mesa !== mesaSel) return;
+
   if(d.type === 'tpv_ticket_update') applyTPVUpdate(d);
   if(d.type === 'tpv_ticket_close'){
-    // Bloquear selección cuando el TPV cierra ticket
     list.style.opacity = .6;
     list.style.pointerEvents = "none";
     confirmBtn.disabled = true;
-    // Aviso corto (si tienes la clase .toast ya definida)
     try{
-      const t=document.createElement('div');t.className='toast';t.textContent='Ticket cerrado desde TPV';
+      const t=document.createElement('div');
+      t.className='toast';
+      t.textContent='Ticket cerrado desde TPV';
       document.body.appendChild(t);
-      setTimeout(()=>{t.style.transition='opacity .25s, transform .25s';t.style.opacity=0;t.style.transform='translateY(-8px)';},1500);
+      setTimeout(()=>{t.style.transition='opacity .25s, transform .25s';
+        t.style.opacity=0;t.style.transform='translateY(-8px)';},1500);
       setTimeout(()=>t.remove(),1800);
     }catch(_){}
   }
 };
+
 
     // Toast
     function toast(msg){
