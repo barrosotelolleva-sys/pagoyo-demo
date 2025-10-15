@@ -152,10 +152,23 @@
 const ch = new BroadcastChannel('pagoyo_demo');
 ch.onmessage = (e) => {
   const data = e.data || {};
+  const mesaSel = document.getElementById('mesaSelect').value;
+  if(data.mesa && data.mesa !== mesaSel) return;
 
-  if (data.type === 'partial_confirmed') {
-    addPendingRow(data);
+  if (data.type === 'partial_confirmed') addPendingRow(data);
+  if (data.type === 'tpv_ticket_update') {
+    tpvEl.textContent = data.total || numToEuro(0);
+    totalTPV  = euroToNum(tpvEl.textContent);
+    totalPaid = 0;
+    pending   = 0;
+    paymentsList.innerHTML = '';
+    refreshTotals();
   }
+  if (data.type === 'tpv_ticket_close') {
+    if (banner) banner.style.display = 'block';
+  }
+};
+
 
   if (data.type === 'tpv_ticket_update') {
     // Actualiza Total TPV desde el TPV simulado y resetea cobros/pendientes
