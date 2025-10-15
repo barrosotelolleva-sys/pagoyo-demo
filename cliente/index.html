@@ -170,16 +170,22 @@
   });
 
   // Click +/-
-  list.addEventListener('click',(e)=>{
-    const act = e.target.dataset.act; if(!act) return;
-    const li = e.target.closest('li');
-    const obj = items.find(x=>x.el===li); if(!obj) return;
-    if (act==='+'){ if (obj.selected < obj.total) obj.selected++; }
-    if (act==='-'){ obj.selected = Math.max(0, obj.selected-1); }
-    li.querySelector('.qty').textContent = obj.selected;
-    li.querySelector('.lineTotal').textContent = fmt(obj.selected * obj.price);
-    refreshUI();
-  });
+ list.addEventListener('click',(e)=>{
+  const act = e.target.dataset.act; if(!act) return;
+  const li = e.target.closest('li');
+  const obj = items.find(x=>x.el===li); if(!obj) return;
+
+  if (act==='+'){
+    // no puede seleccionar más de lo que hay en TPV
+    if (obj.selected < obj.total) obj.selected++;
+  }
+  if (act==='-'){
+    obj.selected = Math.max(0, obj.selected - 1);
+  }
+  updateLineMeta(obj);
+  refreshUI();
+});
+
 
   // Confirmar pago
   document.querySelectorAll('.opt').forEach(o=>{
