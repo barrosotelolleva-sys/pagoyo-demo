@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PagoYo — TPV Simulado</title>
+  <style>
+    :root{--teal:#0F766E;--orange:#E67E22;--bg:#F4F6F8}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,Arial,sans-serif;background:#fff;color:#111}
+    header{background:var(--teal);color:#fff;padding:12px}
+    header .bar{max-width:920px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    main{max-width:920px;margin:0 auto;padding:16px;display:grid;gap:12px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .row{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:6px 0}
+    .btn{background:var(--teal);color:#fff;border:none;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer}
+    .btn.alt{background:#111}
+    .btn.warn{background:#e11d48}
+    input,select{border:1px solid #e5e7eb;border-radius:10px;padding:10px}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+    th{color:#0F766E}
+    .right{text-align:right}
+    .pill{background:#f9fafb;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;font-size:12px;color:#444}
+    footer{margin-top:8px}
+    a{color:#0F766E;text-decoration:none;font-weight:600}
+    @media(max-width:780px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <strong>PagoYo — TPV Simulado</strong>
+      <a href="../">⬅ Volver</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- Config mesa -->
+    <section class="card">
+      <div class="row">
+        <div>
+          <label for="mesa">Mesa</label>
+          <select id="mesa">
+            <option value="6" selected>Mesa 6</option>
+            <option value="5">Mesa 5</option>
+            <option value="4">Mesa 4</option>
+          </select>
+        </div>
+        <div>
+          <span class="pill">Este TPV emite eventos a Cliente/Camarero (demo)</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <!-- Catálogo rápido -->
+      <div class="card">
+        <h3 style="margin-top:0;color:#0F766E">Añadir consumiciones</h3>
+        <div class="row">
+          <button class="btn add" data-name="Caña" data-price="1.80">+ Caña (1,80 €)</button>
+          <button class="btn add" data-name="Refresco" data-price="2.20">+ Refresco (2,20 €)</button>
+        </div>
+        <div class="row">
+          <button class="btn add" data-name="Ración Calamares" data-price="9.50">+ Calamares (9,50 €)</button>
+          <button class="btn add" data-name="Ración Patatas" data-price="6.00">+ Patatas (6,00 €)</button>
+        </div>
+        <div class="row">
+          <button class="btn add" data-name="Tarta de Queso" data-price="4.50">+ Tarta (4,50 €)</button>
+          <button class="btn add" data-name="Café" data-price="1.50">+ Café (1,50 €)</button>
+        </div>
+      </div>
+
+      <!-- Ticket actual -->
+      <div class="card">
+        <h3 style="margin-top:0;color:#0F766E">Ticket mesa <span id="mesaLabel">6</span></h3>
+        <table id="ticket">
+          <thead>
+            <tr><th>Artículo</th><th class="right">Precio</th><th class="right">Ud.</th><th class="right">Importe</th><th></th></tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+          <tfoot>
+            <tr><th colspan="3" class="right">Total TPV</th><th id="totalCell" class="right">0,00 €</th><th></th></tr>
+          </tfoot>
+        </table>
+        <div class="row">
+          <button id="btnUpdate" class="btn alt">Enviar a sala (actualizar ticket)</button>
+          <button id="btnClose" class="btn warn">Cerrar ticket</button>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <small>Demo local: los cambios se envían por BroadcastChannel a Cliente y Camarero.</small>
+    </footer>
+  </main>
+
+  <script>
+    // Utilidades €
+    const fmt = n => n.toFixed(2).replace('.', ',') + ' €';
+    // Estado del ticket: { name, price, qty }
+    const items = [];
+    const tbody = document.getElementById('tbody');
+    const totalCell = document.getElementById('totalCell');
+    const mesaSel = document.getElementById('mesa');
+    const mesaLabel = document.getElementById('mesaLabel');
+
+    function render(){
+      tbody.innerHTML = '';
+      let total = 0;
+      items.forEach((it, idx)=>{
+        const imp = it.price * it.qty;
+        total += imp;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${it.name}</td>
+          <td class="right">${fmt(it.price)}</td>
+          <td class="right">
+            <button data-act="-" data-idx="${idx}" style="border:1px solid #e5e7eb;border-radius:6px;padding:0 6px;background:#fff;cursor:pointer">−</button>
+            <span style="display:inline-block;min-width:24px;text-align:center">${it.qty}</span>
+            <button data-act="+" data-idx="${idx}" style="border:1px solid #e5e7eb;border-radius:6px;padding:0 6px;background:#fff;cursor:pointer">+</button>
+          </td>
+          <td class="right">${fmt(imp)}</td>
+          <td class="right">
+            <button data-act="rm" data-idx="${idx}" style="border:none;background:#ef4444;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      totalCell.textContent = fmt(total);
+      mesaLabel.textContent = mesaSel.value;
+    }
+
+    // Añadir desde catálogo
+    document.querySelectorAll('.add').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const name = btn.dataset.name;
+        const price = parseFloat(btn.dataset.price);
+        const found = items.find(i=>i.name===name && i.price===price);
+        if(found){ found.qty++; } else { items.push({name, price, qty:1}); }
+        render();
+      });
+    });
+
+    // Controles + / eliminar
+    tbody.addEventListener('click', e=>{
+      const act = e.target.dataset.act;
+      if(!act) return;
+      const idx = parseInt(e.target.dataset.idx, 10);
+      const it = items[idx];
+      if(!it) return;
+      if(act==='+'){ it.qty++; }
+      else if(act==='-'){ it.qty = Math.max(0, it.qty-1); if(it.qty===0) items.splice(idx,1); }
+      else if(act==='rm'){ items.splice(idx,1); }
+      render();
+    });
+
+    // Canal de demo
+    const ch = new BroadcastChannel('pagoyo_demo');
+
+    // Enviar actualización
+    document.getElementById('btnUpdate').addEventListener('click', ()=>{
+      const mesa = mesaSel.value;
+      const payload = {
+        type: 'tpv_ticket_update',
+        mesa,
+        items: items.map(i=>({name:i.name, price:i.price, qty:i.qty})),
+        total: totalCell.textContent  // "69,90 €"
+      };
+      ch.postMessage(payload);
+      // Pequeña confirmación
+      alert('Ticket enviado a sala (Cliente/Camarero).');
+    });
+
+    // Cerrar ticket
+    document.getElementById('btnClose').addEventListener('click', ()=>{
+      const mesa = mesaSel.value;
+      ch.postMessage({ type:'tpv_ticket_close', mesa });
+      alert('Ticket cerrado (emitido a sala).');
+      // Limpiar
+      items.length = 0;
+      render();
+    });
+
+    // Estado inicial de ejemplo vacío
+    render();
+  </script>
+</body>
+</html>
