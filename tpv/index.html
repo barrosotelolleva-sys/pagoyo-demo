@@ -135,6 +135,9 @@
 
    // ==== Canal robusto de demo (BroadcastChannel con fallback a localStorage) ====
 function makeBus(name, onMessage){
+ // Crear bus robusto (BroadcastChannel o fallback localStorage)
+const bus = makeBus('pagoyo_demo');
+ 
   const HAS_BC = 'BroadcastChannel' in window;
   if (HAS_BC) {
     const bc = new BroadcastChannel(name);
