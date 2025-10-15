@@ -220,9 +220,12 @@
 
   // Escuchar TPV (robusto)
   makeBus('pagoyo_demo', (d)=>{
+     _dbg('LLEGA: ' + JSON.stringify(d));
+    
     const mesaSelEl = document.getElementById('mesaSelect');
     const mesaSel = mesaSelEl ? mesaSelEl.value : "6";
     if (d.mesa && d.mesa !== mesaSel) return;
+     _dbg('LLEGA: ' + JSON.stringify(d));
 
     if (d.type==='tpv_ticket_update') applyTPVUpdate(d);
     if (d.type==='tpv_ticket_close'){
