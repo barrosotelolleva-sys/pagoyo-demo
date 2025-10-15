@@ -70,6 +70,14 @@
       return { post:(d)=>{ try{ localStorage.setItem(name, JSON.stringify(d)); }catch(_){ } }, close:()=>{} };
     }
   }
+  (() => {
+  const box = document.createElement('pre');
+  box.id = 'dbg';
+  box.style = 'position:fixed;right:8px;bottom:8px;max-width:60vw;max-height:35vh;overflow:auto;background:#111;color:#0f0;padding:8px;border-radius:6px;font-size:11px;opacity:.9;z-index:9999';
+  box.textContent = 'DBG Cliente listo...\n';
+  document.body.appendChild(box);
+  window._dbg = (m) => { box.textContent += m + '\n'; };
+})();  
   const bus = makeBus('pagoyo_demo');
 
   // ===== Utilidades y refs
