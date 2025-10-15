@@ -3,410 +3,202 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PagoYo — Vista Cliente</title>
+  <title>PagoYo — Cliente (Demo)</title>
   <style>
-    :root { --teal:#0F766E; --orange:#E67E22; --bg:#F4F6F8; --ink:#111; --muted:#667085; }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);}
-    header{background:var(--teal);color:#fff;padding:12px 14px}
-    header .bar{max-width:820px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
-    header .title{font-weight:800}
-    header .meta{opacity:.95;font-weight:600}
-    main{max-width:820px;margin:auto;padding:18px}
-    .panel{display:grid;gap:10px;margin-bottom:12px}
-    .banner{background:#f0fdfa;border:1px solid #99f6e4;color:#065f46;padding:10px 12px;border-radius:12px;font-weight:700}
-    .totals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(15,118,110,.1)}
-    .label{font-size:12px;color:#555}
-    .value{font-size:18px;font-weight:800;color:#0F766E}
-    .hint{font-size:13px;color:var(--muted)}
-    .list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-    .row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
-    .name{font-weight:700}
-    .metaLine{font-size:12px;color:#555}
-    .controls{display:flex;align-items:center;gap:10px}
-    .pill{background:#f9fafb;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;font-size:12px;color:#444}
-    .btnQty{position:relative;width:40px;height:40px;border:none;border-radius:12px;background:#eef2f6;font-weight:800;cursor:pointer;overflow:hidden}
-    .btnQty:hover{background:#e3e8ef}
-    .btnQty .rip{position:absolute;inset:auto; width:10px;height:10px;border-radius:50%;opacity:.25;transform:translate(-50%,-50%) scale(1);animation:rip .45s ease-out}
-    @keyframes rip{from{transform:translate(-50%,-50%) scale(1);opacity:.3}to{transform:translate(-50%,-50%) scale(16);opacity:0}}
-    .qty{min-width:22px;text-align:center;font-weight:800}
-    .lineTotal{min-width:82px;text-align:right;font-weight:800;color:#0F766E}
-    .summary{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:12px;padding:12px;border:1px solid rgba(15,118,110,.1);margin-top:10px}
-    .summary strong{color:#0F766E}
-    .btnMain{margin-top:14px;display:block;width:100%;background:var(--orange);color:#fff;font-weight:700;padding:14px;border:none;border-radius:12px;font-size:16px;cursor:pointer}
-    .btnMain:disabled{background:#f1a361;cursor:not-allowed}
-    .done{display:none;margin-top:12px;padding:12px;background:#ecfdf5;border:1px solid #86efac;border-radius:12px}
-    .small{color:#444;font-size:14px;margin-top:6px}
-    .ref{font-weight:800;color:#0F766E}
-    footer{text-align:center;margin-top:16px}
-    a{color:#0F766E;text-decoration:none;font-weight:600}
-    /* Modal + animación */
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:18px}
-    .overlay.show{display:flex}
-    .modal{width:min(520px,92vw);background:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:18px;border:1px solid rgba(15,118,110,.15);opacity:0;transform:scale(.98);animation:pop .18s ease-out forwards}
-    @keyframes pop{to{opacity:1;transform:scale(1)}}
-    .modal h3{margin:0 0 10px;color:#0F766E}
-    .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-    .opt{border:1.5px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center;font-weight:700;cursor:pointer;background:#fafafa}
-    .opt:hover{border-color:#0F766E}
-    .opt.cash{background:#fff8ee}
-    .opt.card{background:#eff6ff}
-    .close{margin-top:12px;display:block;width:100%;background:#111;color:#fff;border:none;border-radius:10px;padding:10px;cursor:pointer}
-    /* Toast */
-    .toast{position:fixed;top:14px;right:14px;background:#111;color:#fff;padding:10px 12px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);opacity:0;transform:translateY(-8px);animation:toastIn .2s ease-out forwards}
-    @keyframes toastIn{to{opacity:1;transform:translateY(0)}}
+    :root{--teal:#0F766E;--orange:#E67E22}
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,Arial,sans-serif;color:#111;background:#fff}
+    header{background:var(--teal);color:#fff;padding:12px}
+    header .bar{max-width:920px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+    main{max-width:920px;margin:0 auto;padding:16px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}
+    .pill{background:#F4F6F8;border:1px solid #e5e7eb;border-radius:20px;padding:6px 10px;font-size:12px;color:#0F766E}
+    .btn{background:var(--teal);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+    .opt{border:1px solid #e5e7eb;border-radius:10px;padding:8px 12px;cursor:pointer}
+    ul{list-style:none;padding:0;margin:0} li{padding:10px;border-bottom:1px solid #eee}
+    .controls{display:flex;align-items:center;gap:8px}
+    .qty{min-width:24px;text-align:center;display:inline-block}
+    .right{margin-left:auto}
+    .flash{animation:flash .6s ease-out} @keyframes flash{from{box-shadow:0 0 0 rgba(15,118,110,0)}to{box-shadow:0 0 0 10px rgba(15,118,110,.12)}}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111;color:#fff;padding:10px 14px;border-radius:10px}
   </style>
 </head>
 <body>
-  <header>
-    <div class="bar">
-      <span class="title">Mesa 6 — Elige qué pagar</span>
-      <span class="meta" id="mesaTotal">Total mesa: —</span>
-    </div>
-  </header>
-<div style="text-align:center;background:#F4F6F8;padding:10px 0;">
-  <label for="mesaSelect" style="font-weight:700;color:#0F766E;">Mesa:</label>
-  <select id="mesaSelect" style="padding:6px 10px;border-radius:10px;border:1px solid #ccc;">
-    <option value="6" selected>Mesa 6</option>
-    <option value="5">Mesa 5</option>
-    <option value="4">Mesa 4</option>
-  </select>
-</div>
+  <header><div class="bar"><strong>PagoYo — Cliente</strong><a href="../" style="color:#fff;text-decoration:none">⬅ Inicio</a></div></header>
 
-  <main>
-    <div class="panel">
-      <div class="banner">Selecciona qué quieres pagar. Las unidades que elijas se descuentan del total disponible.</div>
-      <div class="totals">
-        <div class="card">
-          <div class="label">Total disponible (unidades)</div>
-          <div id="unitsLeft" class="value">—</div>
-          <div class="hint">Se reduce al seleccionar</div>
-        </div>
-        <div class="card">
-          <div class="label">Tu selección (€)</div>
-          <div id="myAmount" class="value">0,00 €</div>
-          <div class="hint">Suma de lo que has marcado</div>
-        </div>
-        <div class="card">
-          <div class="label">Quedará por pagar</div>
-          <div id="remainingAmount" class="value">—</div>
-          <div class="hint">Solo informativo en esta demo</div>
-        </div>
-      </div>
-    </div>
-
-    <ul id="itemsList" class="list">
-      <li data-total="3" data-price="9.50" data-name="Ración Calamares" class="row">
-        <div>
-          <div class="name">Ración Calamares <span class="pill">9,50 €</span></div>
-          <div class="metaLine"><span class="leftLine">Quedan <strong>3</strong> de 3</span></div>
-        </div>
-        <div class="controls">
-          <button class="btnQty" data-act="-">−</button>
-          <span class="qty">0</span>
-          <button class="btnQty" data-act="+">+</button>
-          <div class="lineTotal">0,00 €</div>
-        </div>
-      </li>
-
-      <li data-total="6" data-price="2.20" data-name="Refresco" class="row">
-        <div>
-          <div class="name">Refresco <span class="pill">2,20 €</span></div>
-          <div class="metaLine"><span class="leftLine">Quedan <strong>6</strong> de 6</span></div>
-        </div>
-        <div class="controls">
-          <button class="btnQty" data-act="-">−</button>
-          <span class="qty">0</span>
-          <button class="btnQty" data-act="+">+</button>
-          <div class="lineTotal">0,00 €</div>
-        </div>
-      </li>
-
-      <li data-total="2" data-price="6.00" data-name="Ración Patatas" class="row">
-        <div>
-          <div class="name">Ración Patatas <span class="pill">6,00 €</span></div>
-          <div class="metaLine"><span class="leftLine">Quedan <strong>2</strong> de 2</span></div>
-        </div>
-        <div class="controls">
-          <button class="btnQty" data-act="-">−</button>
-          <span class="qty">0</span>
-          <button class="btnQty" data-act="+">+</button>
-          <div class="lineTotal">0,00 €</div>
-        </div>
-      </li>
-
-      <li data-total="4" data-price="1.80" data-name="Caña" class="row">
-        <div>
-          <div class="name">Caña <span class="pill">1,80 €</span></div>
-          <div class="metaLine"><span class="leftLine">Quedan <strong>4</strong> de 4</span></div>
-        </div>
-        <div class="controls">
-          <button class="btnQty" data-act="-">−</button>
-          <span class="qty">0</span>
-          <button class="btnQty" data-act="+">+</button>
-          <div class="lineTotal">0,00 €</div>
-        </div>
-      </li>
-
-      <li data-total="2" data-price="4.50" data-name="Tarta de Queso" class="row">
-        <div>
-          <div class="name">Tarta de Queso <span class="pill">4,50 €</span></div>
-          <div class="metaLine"><span class="leftLine">Quedan <strong>2</strong> de 2</span></div>
-        </div>
-        <div class="controls">
-          <button class="btnQty" data-act="-">−</button>
-          <span class="qty">0</span>
-          <button class="btnQty" data-act="+">+</button>
-          <div class="lineTotal">0,00 €</div>
-        </div>
-      </li>
-    </ul>
-
-    <div class="summary">
-      <div class="hint">Selecciona unidades y pulsa confirmar</div>
-      <div><strong id="myTotal">0,00 €</strong></div>
-    </div>
-    <button id="confirmBtn" class="btnMain" disabled>Confirmar y pagar</button>
-
-    <div id="doneBox" class="done">
-      ✔ Tu parte está lista. Método: <span id="methodTxt" class="ref">—</span><br/>
-      <span class="small">Nombre: <span id="refCode" class="ref"></span></span>
-    </div>
-
-    <footer><p><a href="../">⬅ Volver al inicio</a></p></footer>
-  </main>
-
-  <!-- Modal -->
-  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal">
-      <h3>Selecciona método de pago</h3>
-      <div class="options">
-        <div class="opt cash" data-method="Efectivo">💵 Efectivo</div>
-        <div class="opt card" data-method="Tarjeta">💳 Tarjeta</div>
-      </div>
-      <div style="margin-top:10px">
-        <label for="custName" style="display:block;font-weight:700;margin-bottom:6px;color:#0F766E">
-          Tu nombre (para el camarero)
-        </label>
-        <input id="custName" type="text" placeholder="Ej. Juan"
-          style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px" />
-      </div>
-      <button id="closeBtn" class="close">Cancelar</button>
-    </div>
+  <div style="text-align:center;background:#F4F6F8;padding:10px 0;">
+    <label for="mesaSelect" style="font-weight:700;color:#0F766E;">Mesa:</label>
+    <select id="mesaSelect" style="padding:6px 10px;border-radius:10px;border:1px solid #ccc;">
+      <option value="6" selected>Mesa 6</option>
+      <option value="5">Mesa 5</option>
+      <option value="4">Mesa 4</option>
+    </select>
+  </div>
+  <div id="syncPill" style="text-align:center;font-size:13px;margin:6px 0;color:#0F766E">
+    Mesa <strong id="pillMesa">6</strong> · <span id="pillEstado">esperando ticket…</span>
   </div>
 
+  <main>
+    <section class="card">
+      <div id="mesaTotal" class="row"><strong>Total mesa:</strong> <span>—</span></div>
+      <ul id="itemsList"></ul>
+      <div class="row">
+        <div><span>Mi importe:</span> <strong id="myTotal">0,00 €</strong></div>
+        <div class="right">
+          <span class="opt" data-method="Efectivo">Efectivo</span>
+          <span class="opt" data-method="Tarjeta">Tarjeta</span>
+          <button id="confirmBtn" class="btn" disabled>Confirmar pago</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
   <script>
-    const $ = s => document.querySelector(s);
-    const $$ = s => [...document.querySelectorAll(s)];
-    const list = $("#itemsList");
-    const mesaTotalEl = $("#mesaTotal");
-    const unitsLeftEl = $("#unitsLeft");
-    const myAmountEl = $("#myAmount");
-    const remainingAmountEl = $("#remainingAmount");
-    const myTotalEl = $("#myTotal");
-    const confirmBtn = $("#confirmBtn");
-    const overlay = $("#overlay");
-    const closeBtn = $("#closeBtn");
-    const doneBox = $("#doneBox");
-    const methodTxt = $("#methodTxt");
-    const refCode = $("#refCode");
+  // ===== Bus robusto (BroadcastChannel con fallback a localStorage) =====
+  function makeBus(name, onMessage){
+    const HAS_BC = 'BroadcastChannel' in window;
+    if (HAS_BC){
+      const bc = new BroadcastChannel(name);
+      if (onMessage) bc.onmessage = (e)=>onMessage(e.data||{});
+      return { post:(d)=>bc.postMessage(d), close:()=>bc.close() };
+    } else {
+      if (onMessage){
+        window.addEventListener('storage',(e)=>{
+          if (e.key===name && e.newValue){ try{ onMessage(JSON.parse(e.newValue)); }catch(_){ } }
+        });
+      }
+      return { post:(d)=>{ try{ localStorage.setItem(name, JSON.stringify(d)); }catch(_){ } }, close:()=>{} };
+    }
+  }
+  const bus = makeBus('pagoyo_demo');
 
-    const fmt = n => n.toFixed(2).replace(".", ",") + " €";
+  // ===== Utilidades y refs
+  const fmt = (n)=> (n||0).toFixed(2).replace('.',',') + ' €';
+  const euroToNum = (s)=> parseFloat((s||'0').toString().replace(/\./g,'').replace(',','.').replace(/[^\d.]/g,''))||0;
 
-    // Estado base
-    const items = $$("#itemsList > li").map(li => ({
-      el: li,
-      name: li.dataset.name,
-      price: parseFloat(li.dataset.price),
-      total: parseInt(li.dataset.total,10),
-      selected: 0
-    }));
+  const list = document.getElementById('itemsList');
+  const mesaTotalEl = document.querySelector('#mesaTotal span');
+  const myTotalEl = document.getElementById('myTotal');
+  const confirmBtn = document.getElementById('confirmBtn');
 
-    function mesaImporteTotal(){ return items.reduce((a,i)=> a + i.price * i.total, 0); }
-    function mesaUnidadesTotal(){ return items.reduce((a,i)=> a + i.total, 0); }
-    function mesaUnidadesRestantes(){ return items.reduce((a,i)=> a + (i.total - i.selected), 0); }
-    function mesaImporteRestante(){ return items.reduce((a,i)=> a + (i.total - i.selected) * i.price, 0); }
-    function miImporte(){ return items.reduce((a,i)=> a + i.selected * i.price, 0); }
+  const pillMesa = document.getElementById('pillMesa');
+  const pillEstado = document.getElementById('pillEstado');
 
-    function refreshUI(){
-      mesaTotalEl.textContent = "Total mesa: " + fmt(mesaImporteTotal());
-      unitsLeftEl.textContent = mesaUnidadesRestantes() + " / " + mesaUnidadesTotal();
-      myAmountEl.textContent = fmt(miImporte());
-      remainingAmountEl.textContent = fmt(mesaImporteRestante());
-      myTotalEl.textContent = fmt(miImporte());
-      confirmBtn.disabled = miImporte() <= 0;
+  // Estructura de línea
+  const items = []; // [{ el, name, price, total, selected }]
 
-      items.forEach(i=>{
-        const left = i.total - i.selected;
-        i.el.querySelector(".leftLine strong").textContent = left;
-        i.el.querySelector(".qty").textContent = i.selected;
-        i.el.querySelector(".lineTotal").textContent = fmt(i.selected * i.price);
+  function refreshUI(){
+    // Recalcular "Mi importe"
+    let mt = 0;
+    items.forEach(i=>{ mt += i.selected * i.price; });
+    myTotalEl.textContent = fmt(mt);
+    confirmBtn.disabled = mt <= 0;
+  }
+
+  function ensureLine(name, price){
+    let li = [...document.querySelectorAll('#itemsList > li')].find(x=>x.dataset.name===name);
+    if (!li){
+      li = document.createElement('li');
+      li.dataset.name = name;
+      li.innerHTML = `
+        <div><strong>${name}</strong> <span class="pill" style="margin-left:6px">${price.toFixed(2).replace('.',',')} €</span></div>
+        <div class="controls">
+          <button class="optQty" data-act="-">−</button>
+          <span class="qty">0</span>
+          <button class="optQty" data-act="+">+</button>
+          <div class="lineTotal right">0,00 €</div>
+        </div>`;
+      list.appendChild(li);
+      items.push({ el: li, name, price, total: 0, selected: 0 });
+    }
+    return li;
+  }
+
+  function applyTPVUpdate(payload){
+    // Reset
+    items.forEach(i=>{ i.total = 0; i.selected = 0; i.el.querySelector('.qty').textContent = '0'; i.el.querySelector('.lineTotal').textContent='0,00 €'; });
+    // Cargar desde TPV
+    (payload.items||[]).forEach(it=>{
+      const li = ensureLine(it.name, parseFloat(it.price));
+      const obj = items.find(x=>x.el===li);
+      obj.total = parseInt(it.qty||0,10);
+      obj.selected = 0;
+      li.querySelector('.qty').textContent = '0';
+      li.querySelector('.lineTotal').textContent = '0,00 €';
+    });
+    mesaTotalEl.textContent = payload.total || '—';
+    list.style.opacity = 1; list.style.pointerEvents = 'auto';
+    pillEstado.textContent = 'sincronizado';
+    list.classList.add('flash'); setTimeout(()=>list.classList.remove('flash'),600);
+    refreshUI();
+  }
+
+  // Inicial: limpio
+  items.forEach(i=>{ i.total=0; i.selected=0; });
+  list.style.opacity = .6; list.style.pointerEvents = 'none';
+  mesaTotalEl.textContent = '—';
+  refreshUI();
+
+  // Cambios de mesa
+  document.getElementById('mesaSelect').addEventListener('change', ()=>{
+    const m = document.getElementById('mesaSelect').value;
+    pillMesa.textContent = m;
+    pillEstado.textContent = 'esperando ticket…';
+    items.forEach(i=>{ i.total=0; i.selected=0; });
+    list.style.opacity = .6; list.style.pointerEvents = 'none';
+    mesaTotalEl.textContent = '—';
+    refreshUI();
+  });
+
+  // Click +/-
+  list.addEventListener('click',(e)=>{
+    const act = e.target.dataset.act; if(!act) return;
+    const li = e.target.closest('li');
+    const obj = items.find(x=>x.el===li); if(!obj) return;
+    if (act==='+'){ if (obj.selected < obj.total) obj.selected++; }
+    if (act==='-'){ obj.selected = Math.max(0, obj.selected-1); }
+    li.querySelector('.qty').textContent = obj.selected;
+    li.querySelector('.lineTotal').textContent = fmt(obj.selected * obj.price);
+    refreshUI();
+  });
+
+  // Confirmar pago
+  document.querySelectorAll('.opt').forEach(o=>{
+    o.addEventListener('click', ()=>{
+      const method = o.dataset.method || 'Efectivo';
+      const itemsSel = items.filter(i=>i.selected>0).map(i=>({name:i.name, qty:i.selected, price:i.price}));
+      const total = itemsSel.reduce((s,i)=>s + i.qty*i.price, 0);
+      const mesaSelEl = document.getElementById('mesaSelect');
+      const mesa = mesaSelEl ? mesaSelEl.value : "6";
+      bus.post({
+        type:'partial_confirmed',
+        mesa,
+        name:'Parcial',
+        method,
+        amount: fmt(total),
+        items: itemsSel,
+        code: "M"+mesa+"-"+Math.random().toString(36).slice(2,6).toUpperCase()
       });
-    }
-
-    // Ripple en botones ±
-    function makeRip(e, btn){
-      const r = document.createElement('span');
-      r.className = 'rip';
-      const rect = btn.getBoundingClientRect();
-      r.style.left = (e.clientX - rect.left) + 'px';
-      r.style.top  = (e.clientY - rect.top)  + 'px';
-      btn.appendChild(r);
-      setTimeout(()=>r.remove(), 450);
-    }
-
-    list.addEventListener("click", (e)=>{
-      const act = e.target.dataset.act;
-      if(!act) return;
-      const li = e.target.closest("li");
-      const it = items.find(x=>x.el===li);
-      if(!it) return;
-      if(act === "+"){ if(it.selected < it.total) it.selected++; }
-      else{ if(it.selected > 0) it.selected--; }
-      makeRip(e, e.target);
+      // reset selección
+      items.forEach(i=>{ i.selected=0; i.el.querySelector('.qty').textContent='0'; i.el.querySelector('.lineTotal').textContent='0,00 €'; });
       refreshUI();
     });
-
-    refreshUI();
-
-    // Modal
-    confirmBtn.addEventListener("click", ()=>{
-      overlay.classList.add('show');
-      overlay.setAttribute("aria-hidden","false");
-    });
-    closeBtn.addEventListener("click", ()=>{
-      overlay.classList.remove('show');
-      overlay.setAttribute("aria-hidden","true");
-    });
-    overlay.addEventListener("click", (e)=>{ if(e.target===overlay) closeBtn.click(); });
-
-    // Canal a Camarero
-    const ch = new BroadcastChannel('pagoyo_demo');
-// ====== TPV ⟷ Cliente (demo sin servidor) ======
-function euroToNum(s){ return parseFloat(s.replace(/\./g,'').replace(',','.').replace(/[^\d.]/g,''))||0; }
-
-// Asegura que existe una línea para un item dado (si no, la crea)
-function ensureLine(name, price){
-  let li = [...document.querySelectorAll('#itemsList > li')].find(x=>x.dataset.name===name);
-  if(!li){
-    li = document.createElement('li');
-    li.className = 'row';
-    li.dataset.name = name;
-    li.dataset.price = price.toFixed(2);
-    li.dataset.total = 0;
-    li.innerHTML = `
-      <div>
-        <div class="name">${name} <span class="pill">${price.toFixed(2).replace('.',',')} €</span></div>
-        <div class="metaLine"><span class="leftLine">Quedan <strong>0</strong> de 0</span></div>
-      </div>
-      <div class="controls">
-        <button class="btnQty" data-act="-">−</button>
-        <span class="qty">0</span>
-        <button class="btnQty" data-act="+">+</button>
-        <div class="lineTotal">0,00 €</div>
-      </div>`;
-    document.getElementById('itemsList').appendChild(li);
-    items.push({ el: li, name, price, total: 0, selected: 0 });
-  }
-  return li;
-}
-
-// Aplica un update del TPV (items y total)
-function applyTPVUpdate(payload){
-  // Reiniciar cantidades (lo que queda por pagar) y selección del cliente
-  items.forEach(i=>{ i.total = 0; i.selected = 0; });
-  (payload.items||[]).forEach(it=>{
-    const li = ensureLine(it.name, parseFloat(it.price));
-    const obj = items.find(x=>x.el===li);
-    obj.total = parseInt(it.qty||0,10);
-    obj.selected = 0;
   });
 
-  // Total de mesa que viene del TPV
-  mesaTotalEl.textContent = "Total mesa: " + (payload.total || "0,00 €");
+  // Escuchar TPV (robusto)
+  makeBus('pagoyo_demo', (d)=>{
+    const mesaSelEl = document.getElementById('mesaSelect');
+    const mesaSel = mesaSelEl ? mesaSelEl.value : "6";
+    if (d.mesa && d.mesa !== mesaSel) return;
 
-  // Refrescar la UI y re-habilitar selección
-  list.style.opacity = 1;
-  list.style.pointerEvents = "auto";
-  confirmBtn.disabled = miImporte() <= 0;
-  refreshUI();
-}
-
-// Canal TPV → Cliente
-const chTPV = new BroadcastChannel('pagoyo_demo');
-chTPV.onmessage = (e)=>{
-  const d = e.data || {};
-  const mesaSel = document.getElementById('mesaSelect').value;
-  // Solo procesar si coincide la mesa
-  if(d.mesa && d.mesa !== mesaSel) return;
-
-  if(d.type === 'tpv_ticket_update') applyTPVUpdate(d);
-  if(d.type === 'tpv_ticket_close'){
-    list.style.opacity = .6;
-    list.style.pointerEvents = "none";
-    confirmBtn.disabled = true;
-    try{
-      const t=document.createElement('div');
-      t.className='toast';
-      t.textContent='Ticket cerrado desde TPV';
-      document.body.appendChild(t);
-      setTimeout(()=>{t.style.transition='opacity .25s, transform .25s';
-        t.style.opacity=0;t.style.transform='translateY(-8px)';},1500);
+    if (d.type==='tpv_ticket_update') applyTPVUpdate(d);
+    if (d.type==='tpv_ticket_close'){
+      list.style.opacity = .6; list.style.pointerEvents = 'none'; pillEstado.textContent = 'ticket cerrado'; confirmBtn.disabled = true;
+      const t=document.createElement('div');t.className='toast';t.textContent='Ticket cerrado desde TPV';document.body.appendChild(t);
+      setTimeout(()=>{t.style.transition='opacity .25s, transform .25s';t.style.opacity=0;t.style.transform='translateY(-8px)';},1500);
       setTimeout(()=>t.remove(),1800);
-    }catch(_){}
-  }
-};
-
-
-    // Toast
-    function toast(msg){
-      const t = document.createElement('div');
-      t.className = 'toast';
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(()=>{ t.style.transition='opacity .25s, transform .25s'; t.style.opacity=0; t.style.transform='translateY(-8px)'; }, 1800);
-      setTimeout(()=> t.remove(), 2100);
     }
-
-    // Elegir método y enviar
-    $$(".opt").forEach(opt=>{
-   // Cuando el cliente elige método de pago
-opts.forEach(opt => opt.addEventListener('click', e => {
-  const method = e.target.textContent.trim();
-  const mesa = document.getElementById('mesaSelect')?.value || "6";  // <- NUEVO
-  const code = "M" + mesa + "-" + Math.random().toString(36).slice(2,6).toUpperCase();
-  const amount = fmt(total).replace(/\s/g,'');
-
-  ch.postMessage({
-    type: 'partial_confirmed',
-    mesa,                      // <- NUEVO: mesa seleccionada
-    name,
-    method,
-    amount,
-    items: itemsSel,
-    code
   });
-}));
-   
-        // Enviar
-        ch.postMessage({
-          type: 'partial_confirmed',
-          name, method,
-          amount: fmt(total).replace(/\s/g,''),
-          items: itemsSel,
-          code: "M6-" + Math.random().toString(36).slice(2,6).toUpperCase()
-        });
-
-        // Bloquear cambios en la demo
-        list.style.opacity = .6;
-        list.style.pointerEvents = "none";
-
-        // Toast premium
-        toast('Selección confirmada — espera al camarero');
-      });
-    });
   </script>
 </body>
 </html>
-
