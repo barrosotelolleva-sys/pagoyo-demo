@@ -137,6 +137,21 @@ btnSplit.addEventListener('click', ()=>{
   const items = []; // [{ el, name, price, total, selected }]
 
   function refreshUI(){
+  function currentAmount(){
+  return (items||[]).reduce((s,i)=> s + (i.selected||0) * (i.price||0), 0);
+}
+
+function syncFlowState(){
+  const nameOk = (nameInput.value||'').trim().length > 0;
+  // Botones de método: deshabilitados hasta que haya nombre
+  document.querySelectorAll('.method').forEach(b=>{
+    if (nameOk){ b.classList.remove('disabled'); b.removeAttribute('disabled'); }
+    else       { b.classList.add('disabled');    b.setAttribute('disabled',''); }
+  });
+  // Confirmar: requiere nombre + método + importe > 0
+  confirmBtn.disabled = !(nameOk && selectedMethod && currentAmount() > 0);
+}
+  
     let mt = 0;
     items.forEach(i=>{ mt += i.selected * i.price; });
     myTotalEl.textContent = fmt(mt);
