@@ -58,7 +58,13 @@
       <ul id="itemsList"></ul>
       <div class="row" style="flex-wrap:wrap;gap:12px">
         <div><span>Mi importe:</span> <strong id="myTotal">0,00 €</strong></div>
-        <div class="right" style="display:flex;align-items:center;gap:8px">
+       <div class="right" style="display:flex;align-items:center;gap:8px">
+  <input id="customerName" type="text" placeholder="Tu nombre (obligatorio)" />
+  <button class="opt method btn" data-method="Efectivo"  type="button">💶 Efectivo</button>
+  <button class="opt method btn" data-method="Tarjeta"   type="button">💳 Tarjeta</button>
+  <button id="confirmBtn" class="btn" disabled>Confirmar pago</button>
+</div>
+
           <input id="customerName" type="text" placeholder="Tu nombre (opcional)" />
           <span class="opt" data-method="Efectivo">Efectivo</span>
           <span class="opt" data-method="Tarjeta">Tarjeta</span>
