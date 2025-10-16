@@ -14,17 +14,17 @@
     .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}
     .pill{background:#F4F6F8;border:1px solid #e5e7eb;border-radius:20px;padding:6px 10px;font-size:12px;color:#0F766E}
     .btn{background:var(--teal);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
-    .opt{border:1px solid #e5e7eb;border-radius:10px;padding:8px 12px;cursor:pointer}
-    ul{list-style:none;padding:0;margin:0} li{padding:10px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .btn[disabled], .method.disabled{opacity:.4;pointer-events:none}
+    .method.active{outline:2px solid #0F766E}
+    ul{list-style:none;padding:0;margin:0}
+    li{padding:10px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;gap:10px}
     .controls{display:flex;align-items:center;gap:8px}
     .qty{min-width:24px;text-align:center;display:inline-block}
     .right{margin-left:auto}
     input[type="text"]{border:1px solid #e5e7eb;border-radius:10px;padding:8px 10px}
-    .flash{animation:flash .6s ease-out} @keyframes flash{from{box-shadow:0 0 0 rgba(15,118,110,0)}to{box-shadow:0 0 0 10px rgba(15,118,110,.12)}}
+    .flash{animation:flash .6s ease-out}
+    @keyframes flash{from{box-shadow:0 0 0 rgba(15,118,110,0)}to{box-shadow:0 0 0 10px rgba(15,118,110,.12)}}
     .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111;color:#fff;padding:10px 14px;border-radius:10px}
-   .btn[disabled], .method.disabled{opacity:.4;pointer-events:none}
-.method.active{outline:2px solid #0F766E}
- 
   </style>
 </head>
 <body>
@@ -41,33 +41,30 @@
   <div id="syncPill" style="text-align:center;font-size:13px;margin:6px 0;color:#0F766E">
     Mesa <strong id="pillMesa">6</strong> · <span id="pillEstado">esperando ticket…</span>
   </div>
-<section id="introCard" class="card" style="max-width:920px;margin:12px auto;">
-  <div style="text-align:center;display:grid;gap:12px">
-    <div style="font-size:18px;font-weight:800;color:#0F766E">¿Cómo quieres pagar?</div>
-    <div style="color:#555">Elige la forma de repartir tu parte del ticket.</div>
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button id="btnModeSplit" class="btn" style="background:#111">Pagar a medias con todos</button>
-      <button id="btnModeMine" class="btn">Pagar solo lo mío</button>
+
+  <!-- Pantalla inicial -->
+  <section id="introCard" class="card" style="max-width:920px;margin:12px auto;">
+    <div style="text-align:center;display:grid;gap:12px">
+      <div style="font-size:18px;font-weight:800;color:#0F766E">¿Cómo quieres pagar?</div>
+      <div style="color:#555">Elige la forma de repartir tu parte del ticket.</div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button id="btnModeSplit" class="btn" style="background:#111">Pagar a medias con todos</button>
+        <button id="btnModeMine" class="btn">Pagar solo lo mío</button>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-  <main id="main" style="display:none">  <!-- estaba <main> -->
-  …
-</main>
-
+  <!-- Modo “Pagar lo mío” -->
+  <main id="main" style="display:none">
     <section class="card">
-      
+      <div class="row"><strong>Total mesa:</strong> <span id="mesaTotal">—</span></div>
+      <ul id="itemsList"></ul>
       <div class="row" style="flex-wrap:wrap;gap:12px">
         <div><span>Mi importe:</span> <strong id="myTotal">0,00 €</strong></div>
-       <div class="right" style="display:flex;align-items:center;gap:8px">
-  <input id="customerName" type="text" placeholder="Tu nombre (obligatorio)" />
-  <button class="opt method btn" data-method="Efectivo"  type="button">💶 Efectivo</button>
-  <button class="opt method btn" data-method="Tarjeta"   type="button">💳 Tarjeta</button>
-  <button id="confirmBtn" class="btn" disabled>Confirmar pago</button>
-</div>
-
-          
+        <div class="right" style="display:flex;align-items:center;gap:8px">
+          <input id="customerName" type="text" placeholder="Tu nombre (obligatorio)" />
+          <button class="method btn" data-method="Efectivo" type="button">💶 Efectivo</button>
+          <button class="method btn" data-method="Tarjeta"  type="button">💳 Tarjeta</button>
           <button id="confirmBtn" class="btn" disabled>Confirmar pago</button>
         </div>
       </div>
@@ -101,82 +98,22 @@
   const mesaTotalEl = document.getElementById('mesaTotal');
   const myTotalEl = document.getElementById('myTotal');
   const confirmBtn = document.getElementById('confirmBtn');
-  // ===== flujo y pantallas
-const mainEl   = document.getElementById('main');
-const introEl  = document.getElementById('introCard');
-const btnSplit = document.getElementById('btnModeSplit');
-const btnMine  = document.getElementById('btnModeMine');
-
-let selectedMethod = null;
-
-function showIntro(){
-  introEl.style.display = 'block';
-  mainEl.style.display  = 'none';
-}
-function showMine(){
-  introEl.style.display = 'none';
-  mainEl.style.display  = 'block';
-  // al entrar, obligamos a poner nombre antes de poder elegir método
-  syncFlowState();
-}
- btnMine.addEventListener('click', showMine);
-
-// De momento, solo aviso y seguimos con el paso 2 después
-btnSplit.addEventListener('click', ()=>{
-  alert('Modo "pagar a medias" se activa en el siguiente paso. Usa "Pagar solo lo mío" para la demo.');
-});
- 
   const nameInput = document.getElementById('customerName');
+
   const pillMesa = document.getElementById('pillMesa');
   const pillEstado = document.getElementById('pillEstado');
+  const mainEl   = document.getElementById('main');
+  const introEl  = document.getElementById('introCard');
+  const btnSplit = document.getElementById('btnModeSplit');
+  const btnMine  = document.getElementById('btnModeMine');
+
+  let selectedMethod = null;
+
+  function showIntro(){ introEl.style.display='block'; mainEl.style.display='none'; }
+  function showMine(){  introEl.style.display='none';  mainEl.style.display='block'; syncFlowState(); }
 
   // Estructura de línea
   const items = []; // [{ el, name, price, total, selected }]
-
-  function refreshUI(){
- function refreshUI(){
-  let mt = 0;
-  items.forEach(i=>{ mt += i.selected * i.price; });
-  myTotalEl.textContent = fmt(mt);
-  confirmBtn.disabled = mt <= 0;
-syncFlowState();
-}
-
-function currentAmount(){
-  return (items||[]).reduce((s,i)=> s + (i.selected||0) * (i.price||0), 0);
-}
-
-function syncFlowState(){
-  const nameOk = (nameInput.value||'').trim().length > 0;
-  document.querySelectorAll('.method').forEach(b=>{
-    if (nameOk){ b.classList.remove('disabled'); b.removeAttribute('disabled'); }
-    else       { b.classList.add('disabled');    b.setAttribute('disabled',''); }
-  });
-  confirmBtn.disabled = !(nameOk && selectedMethod && currentAmount() > 0);
-}
-
-nameInput.addEventListener('input', syncFlowState);
-   
-  function currentAmount(){
-  return (items||[]).reduce((s,i)=> s + (i.selected||0) * (i.price||0), 0);
-}
-
-function syncFlowState(){
-  const nameOk = (nameInput.value||'').trim().length > 0;
-  // Botones de método: deshabilitados hasta que haya nombre
-  document.querySelectorAll('.method').forEach(b=>{
-    if (nameOk){ b.classList.remove('disabled'); b.removeAttribute('disabled'); }
-    else       { b.classList.add('disabled');    b.setAttribute('disabled',''); }
-  });
-  // Confirmar: requiere nombre + método + importe > 0
-  confirmBtn.disabled = !(nameOk && selectedMethod && currentAmount() > 0);
-}
-  
-    let mt = 0;
-    items.forEach(i=>{ mt += i.selected * i.price; });
-    myTotalEl.textContent = fmt(mt);
-    confirmBtn.disabled = mt <= 0;
-  }
 
   function ensureLine(name, price){
     let li = [...document.querySelectorAll('#itemsList > li')].find(x=>x.dataset.name===name);
@@ -210,35 +147,48 @@ function syncFlowState(){
     obj.el.querySelector('.lineTotal').textContent = fmt((obj.selected||0) * obj.price);
   }
 
-  // ===== Recibir ticket del TPV
+  function refreshUI(){
+    let mt = 0;
+    items.forEach(i=>{ mt += i.selected * i.price; });
+    myTotalEl.textContent = fmt(mt);
+    confirmBtn.disabled = mt <= 0;
+    syncFlowState();
+  }
+
+  function currentAmount(){
+    return (items||[]).reduce((s,i)=> s + (i.selected||0) * (i.price||0), 0);
+  }
+  function syncFlowState(){
+    const nameOk = (nameInput.value||'').trim().length > 0;
+    document.querySelectorAll('.method').forEach(b=>{
+      if (nameOk){ b.classList.remove('disabled'); b.removeAttribute('disabled'); }
+      else       { b.classList.add('disabled');    b.setAttribute('disabled',''); }
+    });
+    confirmBtn.disabled = !(nameOk && selectedMethod && currentAmount() > 0);
+  }
+  nameInput.addEventListener('input', syncFlowState);
+
+  // Escuchar TPV (robusto + auto mostrar “lo mío” si llega ticket)
   makeBus('pagoyo_demo', (d)=>{
-  try{
-    const mesaSel = (document.getElementById('mesaSelect')?.value || '6').toString().replace(/\D/g,'');
-    const msgMesa = (d.mesa || '6').toString().replace(/\D/g,'');
-    if (msgMesa && mesaSel && msgMesa !== mesaSel) return;
+    try{
+      const mesaSel = (document.getElementById('mesaSelect')?.value || '6').toString().replace(/\D/g,'');
+      const msgMesa = (d.mesa || '6').toString().replace(/\D/g,'');
+      if (msgMesa && mesaSel && msgMesa !== mesaSel) return;
 
-    if (d.type === 'tpv_ticket_update') {
-      applyTPVUpdate(d);
-      // Si está la pantalla de inicio, mostramos el modo “lo mío” automáticamente
-      if (document.getElementById('main').style.display === 'none') {
-        pillEstado.textContent = 'ticket listo';
-        // Si prefieres que no entre solo, comenta la línea siguiente
-        showMine();
-      } else {
-        pillEstado.textContent = 'sincronizado';
+      if (d.type === 'tpv_ticket_update') {
+        applyTPVUpdate(d);
+        if (mainEl.style.display === 'none') { pillEstado.textContent = 'ticket listo'; showMine(); }
+        else { pillEstado.textContent = 'sincronizado'; }
       }
-    }
-
-    if (d.type === 'tpv_ticket_close'){
-      list.style.opacity = .6; list.style.pointerEvents = 'none';
-      pillEstado.textContent = 'ticket cerrado'; confirmBtn.disabled = true;
-      const t=document.createElement('div');t.className='toast';t.textContent='Ticket cerrado desde TPV';document.body.appendChild(t);
-      setTimeout(()=>{t.style.transition='opacity .25s, transform .25s';t.style.opacity=0;t.style.transform='translateY(-8px)';},1500);
-      setTimeout(()=>t.remove(),1800);
-    }
-  }catch(err){ console.error('Cliente onmessage', err); }
-});
-
+      if (d.type === 'tpv_ticket_close'){
+        list.style.opacity = .6; list.style.pointerEvents = 'none';
+        pillEstado.textContent = 'ticket cerrado'; confirmBtn.disabled = true;
+        const t=document.createElement('div');t.className='toast';t.textContent='Ticket cerrado desde TPV';document.body.appendChild(t);
+        setTimeout(()=>{t.style.transition='opacity .25s, transform .25s';t.style.opacity=0;t.style.transform='translateY(-8px)';},1500);
+        setTimeout(()=>t.remove(),1800);
+      }
+    }catch(err){ console.error('Cliente onmessage', err); }
+  });
 
   function applyTPVUpdate(payload){
     try{
@@ -255,7 +205,6 @@ function syncFlowState(){
 
       mesaTotalEl.textContent = payload.total || '—';
       list.style.opacity = 1; list.style.pointerEvents = 'auto';
-      pillEstado.textContent = 'sincronizado';
       list.classList.add('flash'); setTimeout(()=>list.classList.remove('flash'),600);
       refreshUI();
     }catch(err){ console.error('applyTPVUpdate error:', err); }
@@ -267,16 +216,13 @@ function syncFlowState(){
   mesaTotalEl.textContent = '—';
   refreshUI();
 
-  // Cambios de mesa
+  // Cambios de mesa (resetea vista hasta nuevo ticket)
   document.getElementById('mesaSelect').addEventListener('change', ()=>{
     const m = document.getElementById('mesaSelect').value;
-    pillMesa.textContent = m;
-    pillEstado.textContent = 'esperando ticket…';
+    pillMesa.textContent = m; pillEstado.textContent = 'esperando ticket…';
     items.forEach(i=>{ i.total = 0; i.selected = 0; updateLineMeta(i); });
     list.style.opacity = .6; list.style.pointerEvents = 'none';
     mesaTotalEl.textContent = '—';
-    showIntro();
-syncFlowState();
     refreshUI();
   });
 
@@ -291,37 +237,55 @@ syncFlowState();
     refreshUI();
   });
 
-confirmBtn.addEventListener('click', ()=>{
-  const nameOk = (nameInput.value||'').trim().length > 0;
-  if (!nameOk){ alert('Nombre obligatorio.'); nameInput.focus(); return; }
-  if (!selectedMethod){ alert('Selecciona método: 💶 Efectivo o 💳 Tarjeta'); return; }
-
-  const itemsSel = items.filter(i=>i.selected>0).map(i=>({name:i.name, qty:i.selected, price:i.price}));
-  const total = itemsSel.reduce((s,i)=>s + i.qty*i.price, 0);
-  if (total <= 0){ alert('Selecciona al menos una consumición.'); return; }
-
-  const mesaSelEl = document.getElementById('mesaSelect');
-  const mesa = mesaSelEl ? mesaSelEl.value : "6";
-  const customerName = (nameInput.value||'').trim();
-
-  const code = (customerName ? customerName : 'Parcial') + ' • ' + Math.random().toString(36).slice(2,6).toUpperCase();
-
-  bus.post({
-    type:'partial_confirmed',
-    mesa,
-    name:'Parcial',
-    method: selectedMethod,
-    amount: fmt(total),
-    items: itemsSel,
-    code
+  // Selección de método
+  document.querySelectorAll('.method').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if ((nameInput.value||'').trim().length === 0){
+        alert('Escribe tu nombre para continuar.');
+        nameInput.focus();
+        return;
+      }
+      selectedMethod = btn.dataset.method;
+      document.querySelectorAll('.method').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      syncFlowState();
+    });
   });
 
-  // reset selección (mantenemos el nombre y el método activo)
-  items.forEach(i=>{ i.selected=0; updateLineMeta && updateLineMeta(i); });
-  refreshUI();
-  syncFlowState();
-});
+  // Confirmar pago (con nombre + método)
+  confirmBtn.addEventListener('click', ()=>{
+    const nameOk = (nameInput.value||'').trim().length > 0;
+    if (!nameOk){ alert('Nombre obligatorio.'); nameInput.focus(); return; }
+    if (!selectedMethod){ alert('Selecciona método: 💶 Efectivo o 💳 Tarjeta'); return; }
 
+    const itemsSel = items.filter(i=>i.selected>0).map(i=>({name:i.name, qty:i.selected, price:i.price}));
+    const total = itemsSel.reduce((s,i)=>s + i.qty*i.price, 0);
+    if (total <= 0){ alert('Selecciona al menos una consumición.'); return; }
+
+    const mesaSelEl = document.getElementById('mesaSelect');
+    const mesa = mesaSelEl ? mesaSelEl.value : "6";
+    const customerName = (nameInput.value||'').trim();
+    const code = (customerName ? customerName : 'Parcial') + ' • ' + Math.random().toString(36).slice(2,6).toUpperCase();
+
+    bus.post({
+      type:'partial_confirmed',
+      mesa,
+      name:'Parcial',
+      method: selectedMethod,
+      amount: fmt(total),
+      items: itemsSel,
+      code
+    });
+
+    // reset selección (mantenemos nombre y método activo)
+    items.forEach(i=>{ i.selected=0; updateLineMeta(i); });
+    refreshUI();
+    syncFlowState();
+  });
+
+  // Mostrar intro al cargar
+  showIntro();
+  syncFlowState();
   </script>
 </body>
 </html>
