@@ -258,38 +258,37 @@ function syncFlowState(){
     refreshUI();
   });
 
-  // Confirmar pago (con nombre + mesa)
- // Seleccionar método (ya no envía aquí)
-document.querySelectorAll('.method').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    // nombre obligatorio antes de poder elegir
-    if ((nameInput.value||'').trim().length === 0){
-      alert('Escribe tu nombre para continuar.');
-      nameInput.focus();
-      return;
-    }
-    selectedMethod = btn.dataset.method;
-    document.querySelectorAll('.method').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    syncFlowState();
+confirmBtn.addEventListener('click', ()=>{
+  const nameOk = (nameInput.value||'').trim().length > 0;
+  if (!nameOk){ alert('Nombre obligatorio.'); nameInput.focus(); return; }
+  if (!selectedMethod){ alert('Selecciona método: 💶 Efectivo o 💳 Tarjeta'); return; }
+
+  const itemsSel = items.filter(i=>i.selected>0).map(i=>({name:i.name, qty:i.selected, price:i.price}));
+  const total = itemsSel.reduce((s,i)=>s + i.qty*i.price, 0);
+  if (total <= 0){ alert('Selecciona al menos una consumición.'); return; }
+
+  const mesaSelEl = document.getElementById('mesaSelect');
+  const mesa = mesaSelEl ? mesaSelEl.value : "6";
+  const customerName = (nameInput.value||'').trim();
+
+  const code = (customerName ? customerName : 'Parcial') + ' • ' + Math.random().toString(36).slice(2,6).toUpperCase();
+
+  bus.post({
+    type:'partial_confirmed',
+    mesa,
+    name:'Parcial',
+    method: selectedMethod,
+    amount: fmt(total),
+    items: itemsSel,
+    code
   });
+
+  // reset selección (mantenemos el nombre y el método activo)
+  items.forEach(i=>{ i.selected=0; updateLineMeta && updateLineMeta(i); });
+  refreshUI();
+  syncFlowState();
 });
 
-      bus.post({
-        type:'partial_confirmed',
-        mesa,
-        name:'Parcial',
-        method,
-        amount: fmt(total),
-        items: itemsSel,
-        code
-      });
-
-      // reset selección (mantenemos nombre)
-      items.forEach(i=>{ i.selected=0; updateLineMeta(i); });
-      refreshUI();
-    });
-  });
   </script>
 </body>
 </html>
