@@ -104,6 +104,31 @@
   const mesaTotalEl = document.getElementById('mesaTotal');
   const myTotalEl = document.getElementById('myTotal');
   const confirmBtn = document.getElementById('confirmBtn');
+  // ===== flujo y pantallas
+const mainEl   = document.getElementById('main');
+const introEl  = document.getElementById('introCard');
+const btnSplit = document.getElementById('btnModeSplit');
+const btnMine  = document.getElementById('btnModeMine');
+
+let selectedMethod = null;
+
+function showIntro(){
+  introEl.style.display = 'block';
+  mainEl.style.display  = 'none';
+}
+function showMine(){
+  introEl.style.display = 'none';
+  mainEl.style.display  = 'block';
+  // al entrar, obligamos a poner nombre antes de poder elegir método
+  syncFlowState();
+}
+ btnMine.addEventListener('click', showMine);
+
+// De momento, solo aviso y seguimos con el paso 2 después
+btnSplit.addEventListener('click', ()=>{
+  alert('Modo "pagar a medias" se activa en el siguiente paso. Usa "Pagar solo lo mío" para la demo.');
+});
+ 
   const nameInput = document.getElementById('customerName');
   const pillMesa = document.getElementById('pillMesa');
   const pillEstado = document.getElementById('pillEstado');
