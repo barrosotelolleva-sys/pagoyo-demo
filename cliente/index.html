@@ -375,6 +375,122 @@ if (btnBack)  btnBack.addEventListener('click', backToIntro);
     items.forEach(i=>{ i.selected=0; updateLineMeta(i); });
     refreshUI();
   });
+// --- Estado y helpers del modo Split
+const splitState = { diners: 2, cash: 0, card: 2 };
+
+function mesaTotalNumber(){
+  // Preferimos el total de la UI (ya formateado), sino 0
+  return euroToNum(mesaTotalEl?.textContent || '0');
+}
+
+function cents(n){ return Math.round((n||0)*100); }
+function euro(c){ return (c/100).toFixed(2).replace('.',',') + ' €'; }
+
+function updateSplitUI(){
+  const total = mesaTotalNumber();                    // total mesa en €
+  const diners= Math.max(1, splitState.diners|0);    // mínimo 1
+  // Mantener la suma cash+card = diners
+  if (splitState.cash < 0) splitState.cash = 0;
+  if (splitState.card < 0) splitState.card = 0;
+  const sum = splitState.cash + splitState.card;
+  if (sum !== diners){
+    // Ajustar tarjeta para cuadrar
+    splitState.card = Math.max(0, diners - splitState.cash);
+  }
+  // UI
+  dinersVal.textContent = diners;
+  cashValEl.textContent = splitState.cash;
+  cardValEl.textContent = splitState.card;
+  splitMesaTotalEl.textContent = mesaTotalEl.textContent || '—';
+
+  // Cálculo per-person con reparto de céntimos
+  const totalC = cents(total);
+  const base   = Math.floor(totalC / diners);
+  const rest   = totalC - base * diners;
+  // Mostramos el importe “medio”
+  perPersonEl.textContent = euro(base + (rest>0?1:0));
+  // Habilitar confirmar si hay ticket y suma ok
+  const ready = totalC > 0 && (splitState.cash + splitState.card === diners);
+  confirmSplitBtn.disabled = !ready;
+}
+
+dinersPlus?.addEventListener('click', ()=>{
+  splitState.diners++;
+  // mantén efectivo; ajusta tarjeta
+  updateSplitUI();
+});
+dinersMinus?.addEventListener('click', ()=>{
+  splitState.diners = Math.max(1, splitState.diners-1);
+  updateSplitUI();
+});
+
+cashPlus?.addEventListener('click', ()=>{
+  splitState.cash++;
+  updateSplitUI();
+});
+cashMinus?.addEventListener('click', ()=>{
+  splitState.cash = Math.max(0, splitState.cash-1);
+  updateSplitUI();
+});
+cardPlus?.addEventListener('click', ()=>{
+  splitState.card++;
+  updateSplitUI();
+});
+cardMinus?.addEventListener('click', ()=>{
+  splitState.card = Math.max(0, splitState.card-1);
+  updateSplitUI();
+});
+
+// Recalcular si el TPV manda un ticket nuevo mientras estamos en split
+// (Añade esto dentro de tu listener del bus, en el branch 'tpv_ticket_update')
+/*
+if (splitCard && splitCard.style.display === 'block') {
+  splitMesaTotalEl.textContent = mesaTotalEl.textContent || '—';
+  updateSplitUI();
+}
+*/
+
+// Confirmar “pagar a medias”
+confirmSplitBtn?.addEventListener('click', ()=>{
+  const totalC = cents(mesaTotalNumber());
+  const diners = Math.max(1, splitState.diners|0);
+
+  // repartir céntimos: 'rest' personas pagarán 1 céntimo más
+  const base = Math.floor(totalC / diners);
+  const rest = totalC - base*diners;
+
+  // Secuencia de métodos: primero Efectivo (X), luego Tarjeta (Y)
+  const methods = Array(splitState.cash).fill('Efectivo')
+                  .concat(Array(splitState.card).fill('Tarjeta'));
+
+  // Mesa actual
+  const mesaSelEl = document.getElementById('mesaSelect');
+  const mesa = mesaSelEl ? mesaSelEl.value : "6";
+
+  // Emitimos N parciales (detalle simple “Media i/N”)
+  for (let i=0;i<diners;i++){
+    const amtC = base + (i < rest ? 1 : 0);
+    const method = methods[i] || 'Tarjeta'; // fallback
+    const code = `Media • ${i+1}/${diners} (${method})`;
+
+    bus.post({
+      type:'partial_confirmed',
+      mesa,
+      name:'Parcial',
+      method,
+      amount: euro(amtC),
+      items: [],   // en “medias” no enviamos líneas; solo el importe
+      code
+    });
+  }
+
+  // Aviso y volver
+  const t=document.createElement('div');t.className='toast';t.textContent='Reparto enviado al camarero';document.body.appendChild(t);
+  setTimeout(()=>{t.style.transition='opacity .25s, transform .25s';t.style.opacity=0;t.style.transform='translateY(-8px)';},1400);
+  setTimeout(()=>t.remove(),1700);
+
+  backToIntro();
+});
 
   // Mostrar portada al cargar
   showIntro();
