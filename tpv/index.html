@@ -126,6 +126,15 @@ mesaSel.addEventListener('change', ()=>{
     const mesaLabel = document.getElementById('mesaLabel');
     // --- Sincronizar cambio de mesa con la sala ---
 mesaSel.addEventListener('change', ()=>{
+  mesaLabel.textContent = mesaSel.value;
+  bus.post({
+    type: 'tpv_ticket_update',
+    mesa: mesaSel.value,
+    items: items.map(i=>({name:i.name, price:i.price, qty:i.qty})),
+    total: totalCell.textContent
+  });
+});
+
   // Actualiza el rótulo
   mesaLabel.textContent = mesaSel.value;
 
