@@ -194,7 +194,7 @@
 
       if (d.type === 'tpv_ticket_update') {
         applyTPVUpdate(d);
-        if (mainEl.style.display === 'none') { pillEstado.textContent = 'ticket listo'; showMine(); }
+        if (mainEl.style.display === 'none') { pillEstado.textContent = 'ticket listo';  }
         else { pillEstado.textContent = 'sincronizado'; }
       }
       if (d.type === 'tpv_ticket_close'){
@@ -303,6 +303,9 @@
   // Mostrar intro al cargar
   showIntro();
   syncFlowState();
+   showIntro();
+syncFlowState && syncFlowState();
+ 
   </script>
 </body>
 </html>
