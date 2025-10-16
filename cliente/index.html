@@ -259,16 +259,21 @@ function syncFlowState(){
   });
 
   // Confirmar pago (con nombre + mesa)
-  document.querySelectorAll('.opt').forEach(o=>{
-    o.addEventListener('click', ()=>{
-      const method = o.dataset.method || 'Efectivo';
-      const itemsSel = items.filter(i=>i.selected>0).map(i=>({name:i.name, qty:i.selected, price:i.price}));
-      const total = itemsSel.reduce((s,i)=>s + i.qty*i.price, 0);
-      const mesaSelEl = document.getElementById('mesaSelect');
-      const mesa = mesaSelEl ? mesaSelEl.value : "6";
-      const customerName = (nameInput.value || '').trim();
-      // usamos code para mostrar el nombre en Camarero
-      const code = (customerName ? customerName : 'Parcial') + ' • ' + Math.random().toString(36).slice(2,6).toUpperCase();
+ // Seleccionar método (ya no envía aquí)
+document.querySelectorAll('.method').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    // nombre obligatorio antes de poder elegir
+    if ((nameInput.value||'').trim().length === 0){
+      alert('Escribe tu nombre para continuar.');
+      nameInput.focus();
+      return;
+    }
+    selectedMethod = btn.dataset.method;
+    document.querySelectorAll('.method').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    syncFlowState();
+  });
+});
 
       bus.post({
         type:'partial_confirmed',
