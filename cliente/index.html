@@ -155,6 +155,23 @@
   const myTotalEl = document.getElementById('myTotal');
   const confirmBtn = document.getElementById('confirmBtn');
   const nameInput = document.getElementById('customerName');
+// --- Split (pagar a medias)
+const splitCard  = document.getElementById('splitCard');
+const btnBack    = document.getElementById('btnBackToIntro');
+const splitMesaTotalEl = document.getElementById('splitMesaTotal');
+const dinersMinus= document.getElementById('dinersMinus');
+const dinersPlus = document.getElementById('dinersPlus');
+const dinersVal  = document.getElementById('dinersVal');
+const perPersonEl= document.getElementById('perPerson');
+const cashMinus  = document.getElementById('cashMinus');
+const cashPlus   = document.getElementById('cashPlus');
+const cardMinus  = document.getElementById('cardMinus');
+const cardPlus   = document.getElementById('cardPlus');
+const cashValEl  = document.getElementById('cashVal');
+const cardValEl  = document.getElementById('cardVal');
+const confirmSplitBtn = document.getElementById('confirmSplitBtn');
+
+const euroToNum = (s)=> parseFloat((s||'0').toString().replace(/\./g,'').replace(',','.').replace(/[^\d.]/g,''))||0; // si no lo tienes ya
 
   const pillMesa = document.getElementById('pillMesa');
   const pillEstado = document.getElementById('pillEstado');
