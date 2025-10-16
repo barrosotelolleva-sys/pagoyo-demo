@@ -142,6 +142,7 @@ btnSplit.addEventListener('click', ()=>{
   items.forEach(i=>{ mt += i.selected * i.price; });
   myTotalEl.textContent = fmt(mt);
   confirmBtn.disabled = mt <= 0;
+syncFlowState();
 }
 
 function currentAmount(){
