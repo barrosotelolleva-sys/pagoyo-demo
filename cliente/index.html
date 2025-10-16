@@ -40,28 +40,6 @@
   </div>
   <div id="syncPill" style="text-align:center;font-size:13px;margin:6px 0;color:#0F766E">
     Mesa <strong id="pillMesa">6</strong> · <span id="pillEstado">esperando ticket…</span>
-  </div> <!-- cierra syncPill -->
-
-<!-- Pantalla inicial -->
-<section id="introCard" class="card" style="max-width:920px;margin:12px auto;">
-  <div style="text-align:center;display:grid;gap:12px">
-    <div style="font-size:18px;font-weight:800;color:#0F766E">¿Cómo quieres pagar?</div>
-    <div style="color:#555">Elige la forma de repartir tu parte del ticket.</div>
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-    <button id="btnModeSplit" class="btn" type="button" style="background:#111">
-  Pagar a medias con todos
-</button>
-<button id="btnModeMine" class="btn" type="button">
-  Pagar solo lo mío
-</button>
- 
-    </div>
-  </div>
-</section>
-
-<!-- Modo “Pagar lo mío” -->
-<main id="main" style="display:none">
-  
   </div>
 
   <!-- Pantalla inicial -->
@@ -70,8 +48,8 @@
       <div style="font-size:18px;font-weight:800;color:#0F766E">¿Cómo quieres pagar?</div>
       <div style="color:#555">Elige la forma de repartir tu parte del ticket.</div>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-        <button id="btnModeSplit" class="btn" style="background:#111">Pagar a medias con todos</button>
-        <button id="btnModeMine" class="btn">Pagar solo lo mío</button>
+        <button id="btnModeSplit" class="btn" type="button" style="background:#111">Pagar a medias con todos</button>
+        <button id="btnModeMine" class="btn" type="button">Pagar solo lo mío</button>
       </div>
     </div>
   </section>
@@ -124,38 +102,18 @@
 
   const pillMesa = document.getElementById('pillMesa');
   const pillEstado = document.getElementById('pillEstado');
+
+  // Portada / modo
   const mainEl   = document.getElementById('main');
   const introEl  = document.getElementById('introCard');
   const btnSplit = document.getElementById('btnModeSplit');
   const btnMine  = document.getElementById('btnModeMine');
-    // Referencias a la portada y al modo "lo mío"
-const mainEl   = document.getElementById('main');
-const introEl  = document.getElementById('introCard');
-const btnSplit = document.getElementById('btnModeSplit');
-const btnMine  = document.getElementById('btnModeMine');
-
-function showIntro(){
-  if (introEl) introEl.style.display = 'block';
-  if (mainEl)  mainEl.style.display  = 'none';
-}
-function showMine(){
-  if (introEl) introEl.style.display = 'none';
-  if (mainEl)  mainEl.style.display  = 'block';
-  // al entrar, recalculamos habilitados (nombre/método/importe)
-  if (typeof syncFlowState === 'function') syncFlowState();
-}
-
-// Listeners de los dos botones de la portada
-if (btnMine)  btnMine.addEventListener('click', showMine);
-if (btnSplit) btnSplit.addEventListener('click', ()=>{
-  alert('El modo "Pagar a medias" lo activamos en el siguiente paso. Usa "Pagar solo lo mío" para la demo.');
-});
-
-
-  let selectedMethod = null;
 
   function showIntro(){ introEl.style.display='block'; mainEl.style.display='none'; }
   function showMine(){  introEl.style.display='none';  mainEl.style.display='block'; syncFlowState(); }
+
+  if (btnMine)  btnMine.addEventListener('click', showMine);
+  if (btnSplit) btnSplit.addEventListener('click', ()=>{ alert('Activamos “Pagar a medias” en el siguiente paso. Usa “Pagar solo lo mío” para la demo.'); });
 
   // Estructura de línea
   const items = []; // [{ el, name, price, total, selected }]
@@ -203,6 +161,7 @@ if (btnSplit) btnSplit.addEventListener('click', ()=>{
   function currentAmount(){
     return (items||[]).reduce((s,i)=> s + (i.selected||0) * (i.price||0), 0);
   }
+  let selectedMethod = null;
   function syncFlowState(){
     const nameOk = (nameInput.value||'').trim().length > 0;
     document.querySelectorAll('.method').forEach(b=>{
@@ -213,7 +172,7 @@ if (btnSplit) btnSplit.addEventListener('click', ()=>{
   }
   nameInput.addEventListener('input', syncFlowState);
 
-  // Escuchar TPV (robusto + auto mostrar “lo mío” si llega ticket)
+  // Escuchar TPV (robusto). No entrar solo; mostrar “ticket listo”.
   makeBus('pagoyo_demo', (d)=>{
     try{
       const mesaSel = (document.getElementById('mesaSelect')?.value || '6').toString().replace(/\D/g,'');
@@ -222,8 +181,8 @@ if (btnSplit) btnSplit.addEventListener('click', ()=>{
 
       if (d.type === 'tpv_ticket_update') {
         applyTPVUpdate(d);
-        if (mainEl.style.display === 'none') { pillEstado.textContent = 'ticket listo';  }
-        else { pillEstado.textContent = 'sincronizado'; }
+        pillEstado.textContent = 'ticket listo';
+        // Mantener portada hasta que pulse “Pagar solo lo mío”
       }
       if (d.type === 'tpv_ticket_close'){
         list.style.opacity = .6; list.style.pointerEvents = 'none';
@@ -261,7 +220,7 @@ if (btnSplit) btnSplit.addEventListener('click', ()=>{
   mesaTotalEl.textContent = '—';
   refreshUI();
 
-  // Cambios de mesa (resetea vista hasta nuevo ticket)
+  // Cambios de mesa
   document.getElementById('mesaSelect').addEventListener('change', ()=>{
     const m = document.getElementById('mesaSelect').value;
     pillMesa.textContent = m; pillEstado.textContent = 'esperando ticket…';
@@ -282,7 +241,7 @@ if (btnSplit) btnSplit.addEventListener('click', ()=>{
     refreshUI();
   });
 
-  // Selección de método
+  // Seleccionar método
   document.querySelectorAll('.method').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       if ((nameInput.value||'').trim().length === 0){
@@ -297,7 +256,7 @@ if (btnSplit) btnSplit.addEventListener('click', ()=>{
     });
   });
 
-  // Confirmar pago (con nombre + método)
+  // Confirmar pago
   confirmBtn.addEventListener('click', ()=>{
     const nameOk = (nameInput.value||'').trim().length > 0;
     if (!nameOk){ alert('Nombre obligatorio.'); nameInput.focus(); return; }
@@ -325,17 +284,11 @@ if (btnSplit) btnSplit.addEventListener('click', ()=>{
     // reset selección (mantenemos nombre y método activo)
     items.forEach(i=>{ i.selected=0; updateLineMeta(i); });
     refreshUI();
-    syncFlowState();
   });
 
-  // Mostrar intro al cargar
- showIntro();
-if (typeof syncFlowState === 'function') syncFlowState();
-
+  // Mostrar portada al cargar
+  showIntro();
   syncFlowState();
-   showIntro();
-syncFlowState && syncFlowState();
- 
   </script>
 </body>
 </html>
