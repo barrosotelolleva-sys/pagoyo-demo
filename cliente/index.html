@@ -274,6 +274,12 @@ if (btnBack)  btnBack.addEventListener('click', backToIntro);
         pillEstado.textContent = 'ticket listo';
         // Mantener portada hasta que pulse “Pagar solo lo mío”
       }
+            // 🔄 Si estamos en la pantalla de "Pagar a medias", actualiza el total y recalcula
+      if (splitCard && splitCard.style.display === 'block') {
+        splitMesaTotalEl.textContent = mesaTotalEl.textContent || '—';
+        if (typeof updateSplitUI === 'function') updateSplitUI();
+      }
+
       if (d.type === 'tpv_ticket_close'){
         list.style.opacity = .6; list.style.pointerEvents = 'none';
         pillEstado.textContent = 'ticket cerrado'; confirmBtn.disabled = true;
