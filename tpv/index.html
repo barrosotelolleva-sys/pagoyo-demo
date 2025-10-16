@@ -109,44 +109,7 @@
     const tbody = document.getElementById('tbody');
     const totalCell = document.getElementById('totalCell');
     const mesaSel = document.getElementById('mesa');
-    // --- Sincronizar cambio de mesa con la sala ---
-mesaSel.addEventListener('change', ()=>{
-  // Actualiza el rótulo
-  mesaLabel.textContent = mesaSel.value;
-
-  // Emite un update "en blanco o con lo que haya"
-  bus.post({
-    type: 'tpv_ticket_update',
-    mesa: mesaSel.value,
-    items: items.map(i=>({ name:i.name, price:i.price, qty:i.qty })), // si no hay, será []
-    total: totalCell.textContent                                     // "0,00 €" si está vacío
-  });
-});
-
     const mesaLabel = document.getElementById('mesaLabel');
-    // --- Sincronizar cambio de mesa con la sala ---
-mesaSel.addEventListener('change', ()=>{
-  mesaLabel.textContent = mesaSel.value;
-  bus.post({
-    type: 'tpv_ticket_update',
-    mesa: mesaSel.value,
-    items: items.map(i=>({name:i.name, price:i.price, qty:i.qty})),
-    total: totalCell.textContent
-  });
-});
-
-  // Actualiza el rótulo
-  mesaLabel.textContent = mesaSel.value;
-
-  // Emite un update "en blanco o con lo que haya"
-  bus.post({
-    type: 'tpv_ticket_update',
-    mesa: mesaSel.value,
-    items: items.map(i=>({ name:i.name, price:i.price, qty:i.qty })), // si no hay, será []
-    total: totalCell.textContent                                     // "0,00 €" si está vacío
-  });
-});
-
     const items = []; // {name, price, qty}
 
     function render(){
@@ -171,6 +134,17 @@ mesaSel.addEventListener('change', ()=>{
       mesaLabel.textContent = mesaSel.value;
     }
 
+    // + / - / eliminar
+    tbody.addEventListener('click', e=>{
+      const act = e.target.dataset.act; if(!act) return;
+      const idx = parseInt(e.target.dataset.idx,10); const it = items[idx]; if(!it) return;
+      if(act==='+') it.qty++;
+      if(act==='-'){ it.qty = Math.max(0,it.qty-1); if(it.qty===0) items.splice(idx,1); }
+      if(act==='rm') items.splice(idx,1);
+      render();
+    });
+
+    // Add buttons
     document.querySelectorAll('.add').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const name = btn.dataset.name;
@@ -179,15 +153,6 @@ mesaSel.addEventListener('change', ()=>{
         if(found){ found.qty++; } else { items.push({name, price, qty:1}); }
         render();
       });
-    });
-
-    tbody.addEventListener('click', e=>{
-      const act = e.target.dataset.act; if(!act) return;
-      const idx = parseInt(e.target.dataset.idx,10); const it = items[idx]; if(!it) return;
-      if(act==='+') it.qty++;
-      if(act==='-'){ it.qty = Math.max(0,it.qty-1); if(it.qty===0) items.splice(idx,1); }
-      if(act==='rm') items.splice(idx,1);
-      render();
     });
 
     // Enviar actualización (SIEMPRE con mesa)
@@ -210,25 +175,40 @@ mesaSel.addEventListener('change', ()=>{
       items.length = 0; render();
     });
 
-    // Preset y limpiar
-   document.getElementById('btnPreset').addEventListener('click', ()=>{
-  items.length = 0;
-  const add=(n,p,q)=>items.push({name:n,price:p,qty:q});
-  add('Caña',1.80,2); add('Refresco',2.20,2); add('Ración Calamares',9.50,1);
-  add('Ración Patatas',6.00,1); add('Tarta de Queso',4.50,2);
-  render();
+    // Preset (y EMITIR)
+    document.getElementById('btnPreset').addEventListener('click', ()=>{
+      items.length = 0;
+      const add=(n,p,q)=>items.push({name:n,price:p,qty:q});
+      add('Caña',1.80,2); add('Refresco',2.20,2); add('Ración Calamares',9.50,1);
+      add('Ración Patatas',6.00,1); add('Tarta de Queso',4.50,2);
+      render();
 
-  const mesa = mesaSel ? mesaSel.value : "6";
-  bus.post({
-    type: 'tpv_ticket_update',
-    mesa,
-    items: items.map(i=>({name:i.name, price:i.price, qty:i.qty})),
-    total: totalCell.textContent
-  });
-});
-
+      const mesa = mesaSel ? mesaSel.value : "6";
+      bus.post({
+        type: 'tpv_ticket_update',
+        mesa,
+        items: items.map(i=>({name:i.name, price:i.price, qty:i.qty})),
+        total: totalCell.textContent
+      });
     });
-    document.getElementById('btnClear').addEventListener('click', ()=>{ items.length = 0; render(); });
+
+    // Limpiar
+    document.getElementById('btnClear').addEventListener('click', ()=>{
+      items.length = 0; render();
+      const mesa = mesaSel ? mesaSel.value : "6";
+      bus.post({ type: 'tpv_ticket_update', mesa, items: [], total: totalCell.textContent });
+    });
+
+    // Cambio de mesa: actualizar rótulo y EMITIR
+    mesaSel.addEventListener('change', ()=>{
+      mesaLabel.textContent = mesaSel.value;
+      bus.post({
+        type: 'tpv_ticket_update',
+        mesa: mesaSel.value,
+        items: items.map(i=>({name:i.name, price:i.price, qty:i.qty})),
+        total: totalCell.textContent
+      });
+    });
 
     render();
   </script>
