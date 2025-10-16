@@ -184,9 +184,26 @@ const euroToNum = (s)=> parseFloat((s||'0').toString().replace(/\./g,'').replace
 
   function showIntro(){ introEl.style.display='block'; mainEl.style.display='none'; }
   function showMine(){  introEl.style.display='none';  mainEl.style.display='block'; syncFlowState(); }
+function showSplit(){
+  if (introEl) introEl.style.display='none';
+  if (mainEl)  mainEl.style.display='none';
+  if (splitCard) splitCard.style.display='block';
+  splitMesaTotalEl.textContent = mesaTotalEl.textContent;
+  splitState.diners = Math.max(1, splitState.diners);
+  splitState.card   = splitState.diners - splitState.cash; 
+  if (splitState.card < 0) splitState.card = 0;
+  updateSplitUI();
+}
+
+function backToIntro(){
+  if (splitCard) splitCard.style.display='none';
+  showIntro();
+}
 
   if (btnMine)  btnMine.addEventListener('click', showMine);
   if (btnSplit) btnSplit.addEventListener('click', ()=>{ alert('Activamos “Pagar a medias” en el siguiente paso. Usa “Pagar solo lo mío” para la demo.'); });
+if (btnSplit) btnSplit.addEventListener('click', showSplit);
+if (btnBack)  btnBack.addEventListener('click', backToIntro);
 
   // Estructura de línea
   const items = []; // [{ el, name, price, total, selected }]
