@@ -137,6 +137,28 @@ btnSplit.addEventListener('click', ()=>{
   const items = []; // [{ el, name, price, total, selected }]
 
   function refreshUI(){
+ function refreshUI(){
+  let mt = 0;
+  items.forEach(i=>{ mt += i.selected * i.price; });
+  myTotalEl.textContent = fmt(mt);
+  confirmBtn.disabled = mt <= 0;
+}
+
+function currentAmount(){
+  return (items||[]).reduce((s,i)=> s + (i.selected||0) * (i.price||0), 0);
+}
+
+function syncFlowState(){
+  const nameOk = (nameInput.value||'').trim().length > 0;
+  document.querySelectorAll('.method').forEach(b=>{
+    if (nameOk){ b.classList.remove('disabled'); b.removeAttribute('disabled'); }
+    else       { b.classList.add('disabled');    b.setAttribute('disabled',''); }
+  });
+  confirmBtn.disabled = !(nameOk && selectedMethod && currentAmount() > 0);
+}
+
+nameInput.addEventListener('input', syncFlowState);
+   
   function currentAmount(){
   return (items||[]).reduce((s,i)=> s + (i.selected||0) * (i.price||0), 0);
 }
