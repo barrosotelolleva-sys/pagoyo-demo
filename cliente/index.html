@@ -128,6 +128,29 @@
   const introEl  = document.getElementById('introCard');
   const btnSplit = document.getElementById('btnModeSplit');
   const btnMine  = document.getElementById('btnModeMine');
+    // Referencias a la portada y al modo "lo mío"
+const mainEl   = document.getElementById('main');
+const introEl  = document.getElementById('introCard');
+const btnSplit = document.getElementById('btnModeSplit');
+const btnMine  = document.getElementById('btnModeMine');
+
+function showIntro(){
+  if (introEl) introEl.style.display = 'block';
+  if (mainEl)  mainEl.style.display  = 'none';
+}
+function showMine(){
+  if (introEl) introEl.style.display = 'none';
+  if (mainEl)  mainEl.style.display  = 'block';
+  // al entrar, recalculamos habilitados (nombre/método/importe)
+  if (typeof syncFlowState === 'function') syncFlowState();
+}
+
+// Listeners de los dos botones de la portada
+if (btnMine)  btnMine.addEventListener('click', showMine);
+if (btnSplit) btnSplit.addEventListener('click', ()=>{
+  alert('El modo "Pagar a medias" lo activamos en el siguiente paso. Usa "Pagar solo lo mío" para la demo.');
+});
+
 
   let selectedMethod = null;
 
@@ -306,7 +329,9 @@
   });
 
   // Mostrar intro al cargar
-  showIntro();
+ showIntro();
+if (typeof syncFlowState === 'function') syncFlowState();
+
   syncFlowState();
    showIntro();
 syncFlowState && syncFlowState();
