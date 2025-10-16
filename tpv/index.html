@@ -202,12 +202,22 @@ mesaSel.addEventListener('change', ()=>{
     });
 
     // Preset y limpiar
-    document.getElementById('btnPreset').addEventListener('click', ()=>{
-      items.length = 0;
-      const add=(n,p,q)=>items.push({name:n,price:p,qty:q});
-      add('Caña',1.80,2); add('Refresco',2.20,2); add('Ración Calamares',9.50,1);
-      add('Ración Patatas',6.00,1); add('Tarta de Queso',4.50,2);
-      render();
+   document.getElementById('btnPreset').addEventListener('click', ()=>{
+  items.length = 0;
+  const add=(n,p,q)=>items.push({name:n,price:p,qty:q});
+  add('Caña',1.80,2); add('Refresco',2.20,2); add('Ración Calamares',9.50,1);
+  add('Ración Patatas',6.00,1); add('Tarta de Queso',4.50,2);
+  render();
+
+  const mesa = mesaSel ? mesaSel.value : "6";
+  bus.post({
+    type: 'tpv_ticket_update',
+    mesa,
+    items: items.map(i=>({name:i.name, price:i.price, qty:i.qty})),
+    total: totalCell.textContent
+  });
+});
+
     });
     document.getElementById('btnClear').addEventListener('click', ()=>{ items.length = 0; render(); });
 
