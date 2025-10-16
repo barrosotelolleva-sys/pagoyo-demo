@@ -267,6 +267,8 @@ function syncFlowState(){
     items.forEach(i=>{ i.total = 0; i.selected = 0; updateLineMeta(i); });
     list.style.opacity = .6; list.style.pointerEvents = 'none';
     mesaTotalEl.textContent = '—';
+    showIntro();
+syncFlowState();
     refreshUI();
   });
 
