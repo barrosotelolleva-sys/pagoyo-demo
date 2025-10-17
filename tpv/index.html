@@ -24,6 +24,12 @@
     @media(max-width:780px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/pagoyo-demo/sw.js').catch(console.error);
+  }
+</script>
+
 <body>
   <header>
     <div class="bar">
