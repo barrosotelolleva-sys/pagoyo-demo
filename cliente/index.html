@@ -301,51 +301,8 @@ makeBus('pagoyo_demo', (d)=>{
 }); // ← cierre de makeBus
 
 
-    if (d.type === 'tpv_ticket_close'){
-      list.style.opacity = .6;
-      list.style.pointerEvents = 'none';
-      pillEstado.textContent = 'ticket cerrado';
-      confirmBtn.disabled = true;
+    
 
-      const t = document.createElement('div');
-      t.className = 'toast';
-      t.textContent = 'Ticket cerrado desde TPV';
-      document.body.appendChild(t);
-      setTimeout(()=>{ t.style.transition='opacity .25s, transform .25s'; t.style.opacity=0; t.style.transform='translateY(-8px)'; },1500);
-      setTimeout(()=> t.remove(),1800);
-    }
-   } catch (err) {
-    console.error('Cliente onmessage', err);
-  }
-}); // <-- cierre de makeBus
-
-
-    if (d.type === 'tpv_ticket_close'){
-      list.style.opacity = .6; list.style.pointerEvents = 'none';
-      pillEstado.textContent = 'ticket cerrado'; confirmBtn.disabled = true;
-      const t=document.createElement('div');t.className='toast';t.textContent='Ticket cerrado desde TPV';document.body.appendChild(t);
-      setTimeout(()=>{t.style.transition='opacity .25s, transform .25s';t.style.opacity=0;t.style.transform='translateY(-8px)';},1500);
-      setTimeout(()=>t.remove(),1800);
-    }
-  }catch(err){ console.error('Cliente onmessage', err); 
-});
-
-        // Mantener portada hasta que pulse “Pagar solo lo mío”
-                  // 🔄 Si estamos en la pantalla de "Pagar a medias", actualiza el total y recalcula
-      if (splitCard && splitCard.style.display === 'block') {
-        splitMesaTotalEl.textContent = mesaTotalEl.textContent || '—';
-        if (typeof updateSplitUI === 'function') updateSplitUI();
-      }
-
-      if (d.type === 'tpv_ticket_close'){
-        list.style.opacity = .6; list.style.pointerEvents = 'none';
-        pillEstado.textContent = 'ticket cerrado'; confirmBtn.disabled = true;
-        const t=document.createElement('div');t.className='toast';t.textContent='Ticket cerrado desde TPV';document.body.appendChild(t);
-        setTimeout(()=>{t.style.transition='opacity .25s, transform .25s';t.style.opacity=0;t.style.transform='translateY(-8px)';},1500);
-        setTimeout(()=>t.remove(),1800);
-      }
-    }catch(err){ console.error('Cliente onmessage', err); }
-  });
 
   function applyTPVUpdate(payload){
     try{
