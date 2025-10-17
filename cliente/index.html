@@ -148,8 +148,7 @@
 
   // ===== Utilidades y refs
   const fmt = (n)=> (n||0).toFixed(2).replace('.',',') + ' €';
-  const euroToNum = (s)=> parseFloat((s||'0').toString().replace(/\./g,'').replace(',','.').replace(/[^\d.]/g,''))||0;
-
+  
   const list = document.getElementById('itemsList');
   const mesaTotalEl = document.getElementById('mesaTotal');
   const myTotalEl = document.getElementById('myTotal');
