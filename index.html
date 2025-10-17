@@ -24,6 +24,12 @@
     .hint{margin-top:14px;color:#555;font-size:13px;opacity:.9}
   </style>
 </head>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/pagoyo-demo/sw.js').catch(console.error);
+  }
+</script>
+  
 <body>
   <main class="wrap">
     <section class="card">
