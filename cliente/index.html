@@ -261,32 +261,45 @@ if (btnBack)  btnBack.addEventListener('click', backToIntro);
   }
   nameInput.addEventListener('input', syncFlowState);
 
-  // Escuchar TPV (robusto). No entrar solo; mostrar “ticket listo”.
- // 🔧 Hotfix: sin filtro de mesa + debug visible
+// Escuchar TPV (robusto). No entrar solo; mostrar “ticket listo”.
 makeBus('pagoyo_demo', (d)=>{
   try{
-    // debug box
-    let box = document.getElementById('dbg');
-    if (!box){
-      box = document.createElement('pre');
-      box.id='dbg';
-      box.style='position:fixed;right:8px;bottom:8px;max-width:60vw;max-height:35vh;overflow:auto;background:#111;color:#0f0;padding:8px;border-radius:6px;font-size:11px;opacity:.9;z-index:9999';
-      box.textContent='DBG Cliente listo...\n';
-      document.body.appendChild(box);
-    }
-    box.textContent += 'LLEGA: ' + JSON.stringify(d) + '\n';
+    // (opcional) filtro por mesa — déjalo activo si quieres:
+    const mesaSel = (document.getElementById('mesaSelect')?.value || '6').toString().replace(/\D/g,'');
+    const msgMesa = (d?.mesa || '6').toString().replace(/\D/g,'');
+    if (d && d.type && msgMesa && mesaSel && msgMesa !== mesaSel) return;
 
     if (!d || !d.type) return;
 
     if (d.type === 'tpv_ticket_update') {
       applyTPVUpdate(d);
       pillEstado.textContent = 'ticket listo';
-      // no entramos automáticamente; el usuario elige el modo
+
+      // Si estamos en “Pagar a medias”, refresca totales/cálculo
       if (splitCard && splitCard.style.display === 'block') {
         splitMesaTotalEl.textContent = mesaTotalEl.textContent || '—';
         if (typeof updateSplitUI === 'function') updateSplitUI();
       }
     }
+
+    if (d.type === 'tpv_ticket_close'){
+      list.style.opacity = .6;
+      list.style.pointerEvents = 'none';
+      pillEstado.textContent = 'ticket cerrado';
+      confirmBtn.disabled = true;
+
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = 'Ticket cerrado desde TPV';
+      document.body.appendChild(t);
+      setTimeout(()=>{ t.style.transition='opacity .25s, transform .25s'; t.style.opacity=0; t.style.transform='translateY(-8px)'; },1500);
+      setTimeout(()=> t.remove(),1800);
+    }
+  }catch(err){
+    console.error('Cliente onmessage', err);
+  }
+});
+
 
     if (d.type === 'tpv_ticket_close'){
       list.style.opacity = .6; list.style.pointerEvents = 'none';
