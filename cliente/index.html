@@ -312,8 +312,7 @@ makeBus('pagoyo_demo', (d)=>{
 });
 
         // Mantener portada hasta que pulse “Pagar solo lo mío”
-      }
-            // 🔄 Si estamos en la pantalla de "Pagar a medias", actualiza el total y recalcula
+                  // 🔄 Si estamos en la pantalla de "Pagar a medias", actualiza el total y recalcula
       if (splitCard && splitCard.style.display === 'block') {
         splitMesaTotalEl.textContent = mesaTotalEl.textContent || '—';
         if (typeof updateSplitUI === 'function') updateSplitUI();
