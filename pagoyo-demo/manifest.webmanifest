@@ -1,0 +1,19 @@
+{
+  "name": "PagoYo Demo",
+  "short_name": "PagoYo",
+  "description": "División flexible de tickets para restaurantes (demo).",
+  "start_url": "/pagoyo-demo/?source=pwa",
+  "scope": "/pagoyo-demo/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0F766E",
+  "icons": [
+    { "src": "/pagoyo-demo/icons/pagoyo-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/pagoyo-demo/icons/pagoyo-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Cliente",   "url": "/pagoyo-demo/cliente/",   "icons": [{ "src": "/pagoyo-demo/icons/pagoyo-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Camarero",  "url": "/pagoyo-demo/camarero/",  "icons": [{ "src": "/pagoyo-demo/icons/pagoyo-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "TPV",       "url": "/pagoyo-demo/tpv/",       "icons": [{ "src": "/pagoyo-demo/icons/pagoyo-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}
