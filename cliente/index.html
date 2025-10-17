@@ -263,8 +263,8 @@ if (btnBack)  btnBack.addEventListener('click', backToIntro);
 
 // Escuchar TPV (robusto). No entrar solo; mostrar “ticket listo”.
 makeBus('pagoyo_demo', (d)=>{
-  try{
-    // (opcional) filtro por mesa — déjalo activo si quieres:
+  try {
+    // (opcional) filtro por mesa
     const mesaSel = (document.getElementById('mesaSelect')?.value || '6').toString().replace(/\D/g,'');
     const msgMesa = (d?.mesa || '6').toString().replace(/\D/g,'');
     if (d && d.type && msgMesa && mesaSel && msgMesa !== mesaSel) return;
@@ -281,6 +281,25 @@ makeBus('pagoyo_demo', (d)=>{
         if (typeof updateSplitUI === 'function') updateSplitUI();
       }
     }
+
+    if (d.type === 'tpv_ticket_close') {
+      list.style.opacity = .6;
+      list.style.pointerEvents = 'none';
+      pillEstado.textContent = 'ticket cerrado';
+      confirmBtn.disabled = true;
+
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = 'Ticket cerrado desde TPV';
+      document.body.appendChild(t);
+      setTimeout(()=>{ t.style.transition='opacity .25s, transform .25s'; t.style.opacity=0; t.style.transform='translateY(-8px)'; },1500);
+      setTimeout(()=> t.remove(),1800);
+    }
+  } catch (err) {
+    console.error('Cliente onmessage', err);
+  }
+}); // ← cierre de makeBus
+
 
     if (d.type === 'tpv_ticket_close'){
       list.style.opacity = .6;
